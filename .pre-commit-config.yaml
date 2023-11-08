@@ -1,0 +1,73 @@
+---
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+exclude: "^tests/resources/rosdep_mocks/.*$"
+repos:
+    - hooks:
+        - id: trailing-whitespace
+          args: [--markdown-linebreak-ext=md]
+        - id: check-added-large-files
+        - id: check-executables-have-shebangs
+        # basic checks for custom yaml syntax, i.e. !reference
+        -   id: check-yaml
+            name: Check YAML (unsafe)
+            args: [--unsafe]
+            files: .gitlab-ci.yml
+        # check other yaml files normally
+        -   id: check-yaml
+            exclude: .gitlab-ci.yml
+        - id: check-json
+        - id: check-toml
+        - id: check-merge-conflict
+        - id: forbid-submodules
+      repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.4.0
+    - repo: local
+      hooks:
+        - entry: poetry lock --check
+          id: lockfile
+          language: system
+          name: Lockfile check
+          files: '(pyproject.toml|poetry.lock)'
+          require_serial: true
+          pass_filenames: false
+        - entry: ./ci-format.sh
+          id: format
+          language: system
+          name: Formatting
+          types: [python]
+        - entry: ./ci-typing.sh
+          id: typing
+          language: system
+          name: typing
+          types: [python]
+          require_serial: true
+          pass_filenames: false
+        - entry: ./ci-lint.sh
+          id: lint
+          language: system
+          name: linting
+          types: [python]
+        - entry: ./ci-bst-check.sh
+          id: bst_check
+          language: system
+          name: bst checks
+          stages: [manual]
+          require_serial: true
+          pass_filenames: false
+        - entry: ./ci-unit-test.sh
+          id: unit tests
+          language: system
+          name: unit tests
+          types: [python]
+          stages: [manual]
+          require_serial: true
+          pass_filenames: false
+        - entry: ./ci-integration-test.sh
+          id: integration tests
+          language: system
+          name: integration tests
+          types: [python]
+          stages: [manual]
+          require_serial: true
+          pass_filenames: false

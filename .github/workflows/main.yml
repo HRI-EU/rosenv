@@ -1,0 +1,99 @@
+---
+name: CI
+
+on:
+    push:
+        branches:
+            - "main"
+    pull_request:
+        branches:
+            - "main"
+
+jobs:
+    lock_file_check:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: ./.github/actions/setup-poetry
+            - uses: ./.github/actions/dependency-install
+
+            - name: Check lock file
+              run: poetry lock --check
+
+    formatting:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: ./.github/actions/setup-poetry
+            - uses: ./.github/actions/dependency-install
+
+            - name: Formatting
+              run: ./ci-format.sh --check
+
+    typing:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: ./.github/actions/setup-poetry
+            - uses: ./.github/actions/dependency-install
+
+            - name: Typing
+              run: ./ci-typing.sh
+
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: ./.github/actions/setup-poetry
+            - uses: ./.github/actions/dependency-install
+
+            - name: Linting
+              run: ./ci-lint.sh
+
+    unit_test:
+        strategy:
+            fail-fast: true
+            matrix:
+                os: [ "ubuntu-latest", "ubuntu-22.04", "ubuntu-18.04" ]
+                python-version: [ "3.8", "3.10", "3.11" ]
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: ./.github/actions/setup-poetry
+              with:
+                  python-version: ${{ matrix.python-version }}
+            - uses: ./.github/actions/dependency-install
+
+            - name: Unit Tests
+              run: ./ci-unit-test.sh
+
+    integration_test:
+        runs-on: ubuntu-latest
+        container: osrf/ros:noetic-desktop-full
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: ./.github/actions/setup-poetry
+              with:
+                  python-version: "system"
+            - uses: ./.github/actions/dependency-install
+
+            - name: Integration Tests
+              run: ./ci-integration-test.sh
+
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: ./.github/actions/
+            - uses: ./.github/actions/setup-poetry
+            - uses: ./.github/actions/dependency-install
+
+            - name: Build
+              run: poetry build

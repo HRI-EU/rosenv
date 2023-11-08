@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>adder_meta</name>
+    <version>0.0.1</version>
+    <description>
+        This metapackage depends on the adder lib and the additional service files.
+    </description>
+    <maintainer email="hri@todo.todo">hri</maintainer>
+
+    <license>CC-BY-3.0</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <exec_depend>adder</exec_depend>
+    <exec_depend>adder_srvs</exec_depend>
+
+    <export>
+        <metapackage/>
+        <build_type>cmake</build_type>
+    </export>
+</package>

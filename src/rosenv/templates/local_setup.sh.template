@@ -1,0 +1,6 @@
+#!/bin/sh
+
+: $${_CATKIN_SETUP_DIR:=$ros_folder}
+CATKIN_SETUP_UTIL_ARGS="--extend --local"
+. "$$_CATKIN_SETUP_DIR/setup.sh"
+unset CATKIN_SETUP_UTIL_ARGS

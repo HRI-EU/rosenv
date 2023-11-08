@@ -1,0 +1,33 @@
+---
+name: "Setup poetry"
+description: "Setups python and installs poetry with caching"
+inputs:
+    python-version:
+        description: "Which version of python should be used, 'system' for no separate python"
+        required: true
+        default: "3.10"
+    poetry-version:
+        description: "Which version of poetry should be used"
+        required: true
+        default: "1.5.1"
+runs:
+    using: "composite"
+    steps:
+        - name: Set up Python ${{ inputs.python-version }}
+          uses: actions/setup-python@v4
+          with:
+              python-version: ${{ inputs.python-version }}
+          if: ${{ inputs.python-version }} != 'system'
+
+        - name: Set up poetry cache
+          uses: actions/cache@v3
+          with:
+              path: ~/.local
+              key: poetry-${{ inputs.poetry-version }}
+          id: cache_poetry
+
+        - uses: snok/install-poetry@v1
+          with:
+              version: ${{ inputs.poetry-version }}
+              virtualenvs-in-project: true
+          if: steps.cache_poetry.outputs.cache-hit != 'true'

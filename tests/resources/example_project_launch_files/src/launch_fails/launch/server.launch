@@ -1,0 +1,4 @@
+<launch>
+    <node name="server_1" pkg="server" type="server" output="screen" respawn="true"/>
+        <param name="service_name" type="str" value="add_two_numbers" />
+</launch>

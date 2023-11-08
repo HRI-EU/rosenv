@@ -1,0 +1,15 @@
+#!/bin/sh
+
+export PATH="${rosenv_ros_path}/bin:${rosenv_path}/usr/bin:$$PATH"
+export PKG_CONFIG_PATH="$$PKG_CONFIG_PATH:${rosenv_ros_path}/lib/pkgconfig"
+export LD_LIBRARY_PATH="$$LD_LIBRARY_PATH:${rosenv_ros_path}/lib:${rosenv_ros_path}/lib/x86_64-linux-gnu"
+export CMAKE_PREFIX_PATH="$$CMAKE_PREFIX_PATH:${rosenv_ros_path}"
+
+export ROS_PACKAGE_PATH="$$ROS_PACKAGE_PATH:${rosenv_ros_path}/share"
+export ROSDEP_SOURCE_PATH="${rosdep_source_dir}"
+
+export ROS_HOME="${rosenv_cache_path}/ros"
+
+export ROSENV_ENV="${rosenv_path}"
+
+PS1="[rosenv/${rosenv_name}] $${PS1-} "

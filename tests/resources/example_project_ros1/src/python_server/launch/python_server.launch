@@ -1,0 +1,4 @@
+<launch>
+    <node name="python_server_1" pkg="python_server" type="python_server.py" output="screen" respawn="true"/>
+        <param name="service_name" type="str" value="add_two_numbers" />
+</launch>

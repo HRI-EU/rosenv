@@ -1,0 +1,27 @@
+---
+name: "Install dependencies with poetry"
+description: "Install dependencies with poetry and caching"
+inputs:
+    install-root-project:
+        description: "Should the root project be installed or not"
+        required: true
+        default: "true"
+runs:
+    using: "composite"
+    steps:
+        - name: Set up dependency cache
+          uses: actions/cache@v3
+          id: cache_dependencies
+          with:
+              path: .venv
+              key: ${{ runner.os }}-venv-${{ hashFiles('poetry.lock') }}
+
+        - name: Install dependencies
+          run: poetry install --no-root --no-interaction
+          if: steps.cache_dependencies.outputs.cache-hit != 'true'
+          shell: bash
+
+        - name: Install own project
+          run: poetry install --no-interaction
+          if: inputs.install-root-project == 'true'
+          shell: bash
