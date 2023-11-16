@@ -10,11 +10,6 @@ packages = [{ include = "rosenv", from = "src" }]
 [tool.poetry.scripts]
 rosenv = "rosenv.cli:main"
 
-[[tool.poetry.source]]
-name = "hri-gitlab"
-url = "https://dmz-gitlab.honda-ri.de/api/v4/projects/502/packages/pypi/simple"
-priority = "explicit"
-
 [tool.poetry.dependencies]
 python = "^3.8"
 bloom = "^0.11.2"
