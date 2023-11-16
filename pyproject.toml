@@ -121,8 +121,3 @@ required-imports = ["from __future__ import annotations"]
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
 
-[tool.pylint.'MESSAGES CONTROL']
-max-line-length = 120
-enable     = [ 'E' ]
-disable    = [ 'W', 'C', 'R', 'E0602', 'import-error', 'no-member', 'no-name-in-module']
-
