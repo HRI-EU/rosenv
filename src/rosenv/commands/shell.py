@@ -47,7 +47,7 @@ class ShellCommand(Command):
     name = "shell"
     description = "Spawn a shell with activated rosenv"
 
-    def handle(self) -> int:  # noqa: PLR6301
+    def handle(self) -> int:
         if bool(env := os.environ.get("ROSENV_ENV")):
             _logger.info("Environment already active, from: %s", env)
             return 0
