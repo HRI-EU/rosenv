@@ -19,7 +19,7 @@ jobs:
             - uses: ./.github/actions/dependency-install
 
             - name: Check lock file
-              run: poetry lock --check
+              run: poetry check --lock
 
     formatting:
         runs-on: ubuntu-latest
@@ -58,8 +58,13 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
-                os: [ "ubuntu-latest", "ubuntu-22.04", "ubuntu-18.04" ]
-                python-version: [ "3.8", "3.10", "3.11" ]
+                os:
+                    - "ubuntu-latest"
+                    - "ubuntu-22.04"
+                python-version:
+                    - "3.8"
+                    - "3.10"
+                    - "3.11"
         runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v3
@@ -74,9 +79,16 @@ jobs:
 
     integration_test:
         runs-on: ubuntu-latest
-        container: osrf/ros:noetic-desktop-full
+        container: ros:noetic-ros-base
         steps:
             - uses: actions/checkout@v3
+            - run: apt-get update
+            - run: |
+                apt-get --yes --no-install-recommends install \
+                curl \
+                fakeroot \
+                debhelper \
+                dh-python
 
             - uses: ./.github/actions/setup-poetry
               with:
