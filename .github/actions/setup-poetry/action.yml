@@ -25,6 +25,7 @@ runs:
               path: ~/.local
               key: poetry-${{ inputs.poetry-version }}
           id: cache_poetry
+          if: ${{ inputs.python-version != 'system' }}
 
         - uses: snok/install-poetry@v1
           with:
