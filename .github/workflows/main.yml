@@ -19,7 +19,7 @@ jobs:
             - uses: ./.github/actions/dependency-install
 
             - name: Check lock file
-              run: poetry lock --check
+              run: poetry check --lock
 
     formatting:
         runs-on: ubuntu-latest
