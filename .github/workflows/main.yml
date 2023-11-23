@@ -74,7 +74,7 @@ jobs:
 
     integration_test:
         runs-on: ubuntu-latest
-        container: osrf/ros:noetic-desktop-full
+        container: ros:noetic-ros-base
         steps:
             - uses: actions/checkout@v3
             - run: apt-get update
