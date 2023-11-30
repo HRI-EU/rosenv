@@ -79,7 +79,13 @@ jobs:
 
     integration_test:
         runs-on: ubuntu-latest
-        container: ros:noetic-ros-base
+        strategy:
+            fail-fast: false
+            matrix:
+                container:
+                    - ros:noetic-ros-base
+                    - ros:iron-ros-base
+        container: ${{ matrix.container }}
         steps:
             - uses: actions/checkout@v3
             - run: apt-get update
@@ -88,7 +94,8 @@ jobs:
                 curl \
                 fakeroot \
                 debhelper \
-                dh-python
+                dh-python \
+                python-is-python3
 
             - uses: ./.github/actions/setup-poetry
               with:
