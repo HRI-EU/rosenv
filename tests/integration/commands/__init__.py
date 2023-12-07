@@ -62,20 +62,6 @@ def assert_is_installed(rosenv_target_path: Path, deb_name: str, ros_distro: Ros
     assert (packages_folder / deb_name).exists()
 
 
-def assert_adder_is_installed(rosenv_target_path: Path, deb_name: str, ros_distro: RosDistribution) -> None:
-    header, lib, packages_folder = _get_rosenv_paths(rosenv_target_path, ros_distro)
-    assert (packages_folder / deb_name).exists()
-    assert header.exists()
-    assert lib.exists()
-
-
-def assert_adder_is_not_installed(rosenv_target_path: Path, deb_name: str, ros_distro: RosDistribution) -> None:
-    header, lib, packages_folder = _get_rosenv_paths(rosenv_target_path, ros_distro)
-    assert not (packages_folder / deb_name).exists()
-    assert not header.exists()
-    assert not lib.exists()
-
-
 def get_adder_workspace_paths(ros_workspace_path: Path) -> tuple[Path, Path]:
     return ros_workspace_path / "adder" / "debian", ros_workspace_path / "adder" / ".obj-x86_64-linux-gnu"
 

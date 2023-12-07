@@ -48,7 +48,6 @@ from rosenv.environment.env import UnmetDependencyError
 from rosenv.environment.run_command import CommandAbortedError
 from rosenv.environment.run_command import CommandFailedError
 from tests.integration.commands import MockResponse
-from tests.integration.commands import assert_adder_is_not_installed
 from tests.integration.commands import assert_is_installed
 from tests.integration.commands import assert_is_not_installed
 
@@ -66,16 +65,6 @@ def get_apt_url_spy(mocker: MockerFixture) -> MagicMock:
 @pytest.fixture()
 def download_deb_file_spy(mocker: MockerFixture) -> MagicMock:
     return mocker.spy(AddCommand, "_download_deb_file")
-
-
-@pytest.fixture()
-def nodeps(test_debs: Path) -> Path:
-    return test_debs / "nodeps_0.0.0_all.deb"
-
-
-@pytest.fixture()
-def dep_on_nodeps(test_debs: Path) -> Path:
-    return test_debs / "dep-on-nodeps_0.0.0_all.deb"
 
 
 @pytest.fixture()
@@ -198,7 +187,7 @@ def test_add_via_http_url(
     requests_mock: MagicMock,
 ) -> None:
     requests_mock.get.return_value = MockResponse(nodeps.read_bytes())
-    assert_adder_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
 
     assert not download_spy.called
     assert not get_apt_url_spy.called

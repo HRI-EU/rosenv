@@ -75,6 +75,16 @@ def build_artifact(dist_path: Path, test_debs: Path, deb_name: str) -> Path:
     return temp_deb_file
 
 
+@pytest.fixture()
+def nodeps(test_debs: Path) -> Path:
+    return test_debs / "nodeps_0.0.0_all.deb"
+
+
+@pytest.fixture()
+def dep_on_nodeps(test_debs: Path) -> Path:
+    return test_debs / "dep-on-nodeps_0.0.0_all.deb"
+
+
 @pytest.fixture(autouse=True)
 def requests_mock(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("rosenv.commands.add.requests")

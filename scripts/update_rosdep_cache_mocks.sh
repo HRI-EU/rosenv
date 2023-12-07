@@ -55,12 +55,15 @@ updateRosdepMocks() {
     mock_location="${PWD}/tests/resources/rosdep_mocks"
     (
         log "Initializing rosenv in example_project..."
-        cd "${example_project}" || exit 1
+        cd "$example_project" || exit 1
 
         if ! poetry run rosenv init; then
             errorLog "Initializing rosenv failed, aborting..."
             exit 2
         fi
+
+        poetry run rosenv rosdep add nodeps nodeps
+        poetry run rosenv rosdep add dep-on-nodeps dep-on-nodeps --run-update
 
         rosdep_cache="${PWD}/rosenv/cache/ros/rosdep/"
         if [[ ! -d ${rosdep_cache} ]]; then
@@ -72,7 +75,7 @@ updateRosdepMocks() {
         rm -rfv "${mock_location}/meta.cache" "${mock_location}/sources.cache"
 
         log "Copying new mocks into place"
-        cp -rv "${rosdep_cache}"/* "${mock_location}"
+        cp -rv "$rosdep_cache"/* "$mock_location"
 
         log "Deleting created rosenv"
         rm -rf rosenv
@@ -91,7 +94,7 @@ updateIndexFileMock() {
         --silent \
         --location \
         https://raw.githubusercontent.com/ros/rosdistro/master/index-v4.yaml \
-        >"${index_mock}"
+        >"$index_mock"
 
     log "Update done, don't forget to commit the update"
 }
