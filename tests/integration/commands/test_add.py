@@ -47,6 +47,7 @@ from rosenv.environment.env import FileAlreadyInstalledError
 from rosenv.environment.env import UnmetDependencyError
 from rosenv.environment.run_command import CommandAbortedError
 from rosenv.environment.run_command import CommandFailedError
+from tests.integration.commands import MockResponse
 from tests.integration.commands import assert_adder_is_not_installed
 from tests.integration.commands import assert_is_installed
 from tests.integration.commands import assert_is_not_installed
@@ -67,33 +68,52 @@ def download_deb_file_spy(mocker: MockerFixture) -> MagicMock:
     return mocker.spy(AddCommand, "_download_deb_file")
 
 
-@pytest.mark.usefixtures("_copy_minimal_example_project")
-def test_add_deb_file(
-    deb_name: str,
-    build_artifact: Path,
+@pytest.fixture()
+def nodeps(test_debs: Path) -> Path:
+    return test_debs / "nodeps_0.0.0_all.deb"
+
+
+@pytest.fixture()
+def dep_on_nodeps(test_debs: Path) -> Path:
+    return test_debs / "dep-on-nodeps_0.0.0_all.deb"
+
+
+@pytest.fixture()
+def install_nodeps(
     init_app: Application,
+    nodeps: Path,
+    rosenv_target_path: Path,
+    ros_distro: RosDistribution,
+) -> Application:
+    code = CommandTester(init_app.find("add")).execute(f"nodeps {nodeps!s}")
+    assert code == 0
+    assert_is_installed(rosenv_target_path, nodeps.name, ros_distro)
+    return init_app
+
+
+def test_add_deb_file(
+    install_nodeps: Application,
     rosenv_target_path: Path,
     download_spy: MagicMock,
     get_apt_url_spy: MagicMock,
     download_deb_file_spy: MagicMock,
     ros_distro: RosDistribution,
+    dep_on_nodeps: Path,
 ) -> None:
-    assert_adder_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(rosenv_target_path, dep_on_nodeps.name, ros_distro)
 
     assert not download_spy.called
     assert not get_apt_url_spy.called
     assert not download_deb_file_spy.called
 
-    CommandTester(init_app.find("add")).execute(f"adder {build_artifact}")
+    code = CommandTester(install_nodeps.find("add")).execute(f"dep-on-nodeps {dep_on_nodeps!s}")
+    assert code == 0
 
     assert not download_spy.called
     assert not get_apt_url_spy.called
     assert not download_deb_file_spy.called
 
-    assert_is_installed(rosenv_target_path, deb_name, ros_distro)
-
-
-RosPackageName = str
+    assert_is_installed(rosenv_target_path, dep_on_nodeps.name, ros_distro)
 
 
 def test_add_deb_file_with_missing_dependency(
@@ -137,7 +157,7 @@ def test_add_deb_file_with_missing_alternative_dependencies(
 
 
 def test_add_deb_file_with_available_alternative(
-    init_app: Application,
+    install_nodeps: Application,
     test_debs: Path,
     rosenv_target_path: Path,
     ros_distro: RosDistribution,
@@ -145,7 +165,7 @@ def test_add_deb_file_with_available_alternative(
     deb_name = "alternativedeps_0.0.0_all.deb"
     assert_is_not_installed(rosenv_target_path, deb_name, ros_distro)
 
-    CommandTester(init_app.find("add")).execute(
+    CommandTester(install_nodeps.find("add")).execute(
         f"alternativedeps {test_debs / deb_name}",
     )
 
@@ -153,168 +173,153 @@ def test_add_deb_file_with_available_alternative(
 
 
 def test_add_deb_file_with_unmet_version_dependency(
-    init_app: Application,
+    install_nodeps: Application,
     test_debs: Path,
     rosenv_target_path: Path,
     ros_distro: RosDistribution,
 ) -> None:
-    CommandTester(init_app.find("add")).execute(
-        f"nodeps {test_debs /'nodeps_0.0.0_all.deb'}",
-    )
     deb_name = "unmetversiondep_0.0.0_all.deb"
     assert_is_not_installed(rosenv_target_path, deb_name, ros_distro)
     with pytest.raises(UnmetDependencyError):
-        CommandTester(init_app.find("add")).execute(
+        CommandTester(install_nodeps.find("add")).execute(
             f"unmetversiondep {test_debs /deb_name}",
         )
     assert_is_not_installed(rosenv_target_path, deb_name, ros_distro)
 
 
-@pytest.mark.usefixtures("_copy_minimal_example_project")
 def test_add_via_http_url(
-    deb_name: str,
-    url: MagicMock,
     init_app: Application,
     rosenv_target_path: Path,
     download_spy: MagicMock,
     get_apt_url_spy: MagicMock,
     download_deb_file_spy: MagicMock,
     ros_distro: RosDistribution,
+    nodeps: Path,
+    requests_mock: MagicMock,
 ) -> None:
-    assert_adder_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    requests_mock.get.return_value = MockResponse(nodeps.read_bytes())
+    assert_adder_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
 
     assert not download_spy.called
     assert not get_apt_url_spy.called
     assert not download_deb_file_spy.called
 
-    CommandTester(init_app.find("add")).execute(f"adder {url}")
+    CommandTester(init_app.find("add")).execute(f"adder https://domain.tld/{nodeps.name}")
 
     assert download_spy.call_count == 1
     assert not get_apt_url_spy.called
     assert download_deb_file_spy.call_count == 1
 
-    assert_is_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_installed(rosenv_target_path, nodeps.name, ros_distro)
 
 
-@pytest.mark.usefixtures("_copy_minimal_example_project")
 def test_add_via_package_name(
-    deb_name: str,
     init_app: Application,
     rosenv_target_path: Path,
     download_spy: MagicMock,
     get_apt_url_spy: MagicMock,
     download_deb_file_spy: MagicMock,
     ros_distro: RosDistribution,
+    requests_mock: MagicMock,
+    run_command_mock: MagicMock,
+    nodeps: Path,
 ) -> None:
-    assert_adder_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    requests_mock.get.return_value = MockResponse(nodeps.read_bytes())
+    run_command_mock.return_value = f"https://domain.tld/{nodeps.name}"
+    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
 
     assert not download_spy.called
     assert not get_apt_url_spy.called
     assert not download_deb_file_spy.called
 
-    assert CommandTester(init_app.find("add")).execute("adder") == 0
+    assert CommandTester(init_app.find("add")).execute("nodeps") == 0
 
     assert download_spy.call_count == 1
     assert get_apt_url_spy.call_count == 1
     assert download_deb_file_spy.call_count == 1
 
-    assert_is_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_installed(rosenv_target_path, nodeps.name, ros_distro)
 
 
-@pytest.mark.usefixtures("_copy_minimal_example_project")
 def test_add_via_package_name_not_found(
-    deb_name: str,
     run_command_mock: MagicMock,
     init_app: Application,
-    rosenv_target_path: Path,
-    ros_distro: RosDistribution,
 ) -> None:
     run_command_mock.return_value = ""
-
-    assert_adder_is_not_installed(rosenv_target_path, deb_name, ros_distro)
 
     with pytest.raises(NoDownloadUrlError):
         CommandTester(init_app.find("add")).execute("adder")
 
-    assert_adder_is_not_installed(rosenv_target_path, deb_name, ros_distro)
 
-
-@pytest.mark.usefixtures("_copy_minimal_example_project")
 def test_add_deb_file_install_failed(
     run_mock: MagicMock,
-    deb_name: str,
-    build_artifact: Path,
+    nodeps: Path,
     init_app: Application,
     rosenv_target_path: Path,
     ros_distro: RosDistribution,
 ) -> None:
     assert not (rosenv_target_path / "logs").exists()
-    assert_adder_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
 
     run_mock.side_effect = CommandFailedError(command="command", exit_status=1, output="cool output")
     expected_return_code = 1
 
-    assert CommandTester(init_app.find("add")).execute(f"adder {build_artifact}") == expected_return_code
+    assert CommandTester(init_app.find("add")).execute(f"adder {nodeps!s}") == expected_return_code
 
     assert (rosenv_target_path / "logs" / "adder.log").exists()
 
-    assert_adder_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
 
 
-@pytest.mark.usefixtures("_copy_minimal_example_project")
 def test_add_deb_file_install_aborted(
     run_mock: MagicMock,
-    deb_name: str,
-    build_artifact: Path,
     init_app: Application,
     rosenv_target_path: Path,
     ros_distro: RosDistribution,
+    nodeps: Path,
 ) -> None:
-    assert_adder_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
 
     run_mock.side_effect = CommandAbortedError(command="command", output="cool output")
     expected_return_code = 2
 
-    assert CommandTester(init_app.find("add")).execute(f"adder {build_artifact}") == expected_return_code
+    assert CommandTester(init_app.find("add")).execute(f"adder {nodeps!s}") == expected_return_code
 
-    assert_adder_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
 
 
-@pytest.mark.usefixtures(
-    "_copy_minimal_example_project",
-)
 def test_add_shows_source_package_on_file_conflict(
     init_app: Application,
-    test_debs: Path,
+    nodeps: Path,
     rosenv_target_path: Path,
 ) -> None:
     CommandTester(init_app.find("add")).execute(
-        f"adder {test_debs / 'ros-noetic-adder_0.0.0-0focal_amd64.deb'}",
+        f"adder {nodeps!s}",
     )
 
     with pytest.raises(FileAlreadyInstalledError) as e:
         CommandTester(init_app.find("add")).execute(
-            f"adder2 {test_debs / 'ros-noetic-adder_0.0.0-0focal_amd64.deb'}",
+            f"adder2 {nodeps!s}",
         )
     assert e.value.installed_by_packages == ["adder"]
-    assert e.value.file == rosenv_target_path / "opt/ros/noetic/include/adder/adder.h"
+    assert e.value.file == rosenv_target_path / "usr/share/doc/nodeps/README.Debian"
 
 
 def test_add_shows_multiple_source_packages_on_file_conflict(
     init_app: Application,
-    test_debs: Path,
+    nodeps: Path,
     rosenv_target_path: Path,
 ) -> None:
     CommandTester(init_app.find("add")).execute(
-        f"adder {test_debs / 'ros-noetic-adder_0.0.0-0focal_amd64.deb'}",
+        f"adder {nodeps!s}",
     )
     CommandTester(init_app.find("add")).execute(
-        f"adder2 {test_debs / 'ros-noetic-adder_0.0.0-0focal_amd64.deb'} --overwrite",
+        f"adder2 {nodeps!s} --overwrite",
     )
 
     with pytest.raises(FileAlreadyInstalledError) as e:
         CommandTester(init_app.find("add")).execute(
-            f"adder3 {test_debs / 'ros-noetic-adder_0.0.0-0focal_amd64.deb'}",
+            f"adder3 {nodeps!s}",
         )
     assert e.value.installed_by_packages == ["adder", "adder2"]
-    assert e.value.file == rosenv_target_path / "opt/ros/noetic/include/adder/adder.h"
+    assert e.value.file == rosenv_target_path / "usr/share/doc/nodeps/README.Debian"

@@ -40,6 +40,7 @@ import pytest
 from cleo.application import Application
 from cleo.testers.command_tester import CommandTester
 
+from rosenv.environment.distro import RosDistribution
 from rosenv.environment.env import PackageIsNotInstalledError
 from rosenv.environment.env import RemoveDependencyError
 from rosenv.environment.env import RosEnv
@@ -62,14 +63,15 @@ def test_remove_package(
     build_artifact: Path,
     init_app: Application,
     rosenv_target_path: Path,
+    ros_distro: RosDistribution,
 ) -> None:
     CommandTester(init_app.find("add")).execute(f"adder {build_artifact}")
 
-    assert_adder_is_installed(rosenv_target_path, deb_name)
+    assert_adder_is_installed(rosenv_target_path, deb_name, ros_distro)
 
     CommandTester(init_app.find("remove")).execute("adder")
 
-    assert_adder_is_not_installed(rosenv_target_path, deb_name)
+    assert_adder_is_not_installed(rosenv_target_path, deb_name, ros_distro)
 
 
 @pytest.mark.usefixtures("_copy_minimal_example_project")
@@ -77,8 +79,9 @@ def test_remove_package_but_not_installed(
     deb_name: str,
     init_app: Application,
     rosenv_target_path: Path,
+    ros_distro: RosDistribution,
 ) -> None:
-    assert_adder_is_not_installed(rosenv_target_path, deb_name)
+    assert_adder_is_not_installed(rosenv_target_path, deb_name, ros_distro)
 
     with pytest.raises(PackageIsNotInstalledError):
         CommandTester(init_app.find("remove")).execute("adder")
@@ -93,15 +96,16 @@ def test_remove_package_with_dependents(
     build_artifact: Path,
     init_app: Application,
     rosenv_target_path: Path,
+    ros_distro: RosDistribution,
 ) -> None:
     CommandTester(init_app.find("add")).execute(f"adder {build_artifact}")
-    assert_adder_is_installed(rosenv_target_path, deb_name)
+    assert_adder_is_installed(rosenv_target_path, deb_name, ros_distro)
 
     with pytest.raises(RemoveDependencyError):
         CommandTester(init_app.find("remove")).execute("adder")
 
-    assert_adder_is_installed(rosenv_target_path, deb_name)
+    assert_adder_is_installed(rosenv_target_path, deb_name, ros_distro)
 
     CommandTester(init_app.find("remove")).execute("adder --force")
 
-    assert_adder_is_not_installed(rosenv_target_path, deb_name)
+    assert_adder_is_not_installed(rosenv_target_path, deb_name, ros_distro)

@@ -41,6 +41,7 @@ from cleo.testers.command_tester import CommandTester
 from pytest_mock import MockerFixture
 
 from rosenv.commands.info import InfoCommand
+from rosenv.environment.distro import RosDistribution
 from tests.integration.commands import assert_adder_is_installed
 
 
@@ -68,9 +69,10 @@ def test_info_package(
     package_info_spy: MagicMock,
     env_info_spy: MagicMock,
     workspace_info_spy: MagicMock,
+    ros_distro: RosDistribution,
 ) -> None:
     CommandTester(init_app.find("add")).execute(f"adder {build_artifact}")
-    assert_adder_is_installed(rosenv_target_path, deb_name)
+    assert_adder_is_installed(rosenv_target_path, deb_name, ros_distro)
 
     assert not package_info_spy.called
     assert not env_info_spy.called
@@ -92,9 +94,10 @@ def test_info_workspace(
     package_info_spy: MagicMock,
     env_info_spy: MagicMock,
     workspace_info_spy: MagicMock,
+    ros_distro: RosDistribution,
 ) -> None:
     CommandTester(init_app.find("add")).execute(f"adder {build_artifact}")
-    assert_adder_is_installed(rosenv_target_path, deb_name)
+    assert_adder_is_installed(rosenv_target_path, deb_name, ros_distro)
 
     assert not package_info_spy.called
     assert not env_info_spy.called
