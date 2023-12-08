@@ -4,7 +4,7 @@ yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/base.yaml
 yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/python.yaml 
 yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/ruby.yaml 
 yaml https://raw.githubusercontent.com/ros/rosdistro/master/releases/fuerte.yaml fuerte
-yaml file:///home/hri/project_ros_package/rosenv/tests/resources/example_project_ros1/rosenv/rosdep.yaml 
+yaml file:///home/hri/rosenv/tests/resources/example_project_ros1/rosenv/rosdep.yaml 
 yaml https://raw.githubusercontent.com/ros/rosdistro/master/humble/distribution.yaml humble
 yaml https://raw.githubusercontent.com/ros/rosdistro/master/iron/distribution.yaml iron
 yaml https://raw.githubusercontent.com/ros/rosdistro/master/noetic/distribution.yaml noetic

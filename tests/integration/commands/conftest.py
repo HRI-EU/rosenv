@@ -40,7 +40,6 @@ import pytest
 
 from pytest_mock import MockerFixture
 
-from tests.integration.commands import MockResponse
 from tests.integration.commands import package_name
 
 
@@ -51,7 +50,7 @@ def deb_name() -> str:
 
 @pytest.fixture()
 def url(deb_name: str) -> str:
-    return f"http://domain.tld/{deb_name}"
+    return f"https://domain.tld/{deb_name}"
 
 
 @pytest.fixture()
@@ -76,15 +75,21 @@ def build_artifact(dist_path: Path, test_debs: Path, deb_name: str) -> Path:
     return temp_deb_file
 
 
-@pytest.fixture(autouse=True)
-def requests_mock(mocker: MockerFixture, test_debs: Path, deb_name: str) -> MagicMock:
-    mock = mocker.patch("rosenv.commands.add.requests")
-    mock.get.return_value = MockResponse((test_debs / deb_name).read_bytes())
-    return mock
+@pytest.fixture()
+def nodeps(test_debs: Path) -> Path:
+    return test_debs / "nodeps_0.0.0_all.deb"
+
+
+@pytest.fixture()
+def dep_on_nodeps(test_debs: Path) -> Path:
+    return test_debs / "dep-on-nodeps_0.0.0_all.deb"
 
 
 @pytest.fixture(autouse=True)
-def run_command_mock(mocker: MockerFixture, url: str) -> MagicMock:
-    mock = mocker.patch("rosenv.commands.add.run_command")
-    mock.return_value = url
-    return mock
+def requests_mock(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("rosenv.commands.add.requests")
+
+
+@pytest.fixture(autouse=True)
+def run_command_mock(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("rosenv.commands.add.run_command")
