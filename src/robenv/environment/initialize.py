@@ -64,7 +64,7 @@ class RobEnvInitConfig:
 
     @property
     def robenv_ros_path(self) -> Path:
-        return self.robenv_path / self.ros_path.relative_to(self.ros_path.root)
+        return self.robenv_path / "opt/ros" / self.ros_distro
 
     @property
     def robenv_cache_path(self) -> Path:

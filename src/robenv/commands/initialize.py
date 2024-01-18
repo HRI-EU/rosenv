@@ -31,17 +31,21 @@
 #
 from __future__ import annotations
 
-from logging import getLogger
 from pathlib import Path
+
+from rosenv.environment.distro import parse_distro
+
+from rosenv.commands.util import verify_existing_paths
+
+from rosenv.environment.initialize import initialize
+from logging import getLogger
 
 from cleo.commands.command import Command
 from cleo.helpers import option
 
 from robenv.commands.util import NoRosInstallationDetectedError
 from robenv.commands.util import get_default_ros_path
-from robenv.commands.util import verify_existing_paths
-from robenv.environment.distro import parse_distro
-from robenv.environment.initialize import initialize
+from robenv.rob.rob import ROS
 
 
 _logger = getLogger(__name__)
@@ -75,11 +79,9 @@ class InitRobenvCommand(Command):
     def handle(self) -> int:
         if self.option("ros-path") is None:
             raise NoRosInstallationDetectedError
+        ros = ROS(str(self.option("ros-path")))
 
-        ros_path = Path(self.option("ros-path"))
-
-        ros_distro = parse_distro(ros_path.name)
-        _logger.info("Initializing robenv with ROS distribution: <fg=green>%s</>\n", ros_distro)
+        _logger.info("Initializing robenv with ROS distribution: <fg=green>%s</>\n", ros.distro)
 
         rosdep_path = None
         if self.option("rosdep-path") is not None:
@@ -90,8 +92,8 @@ class InitRobenvCommand(Command):
         verify_existing_paths(workspace_path)
 
         robenv = initialize(
-            ros_path=ros_path,
-            ros_distro=ros_distro,
+            ros_path=ros.path,
+            ros_distro=ros.distro,
             rosdep_path=rosdep_path,
             workspace_path=workspace_path,
         )
@@ -99,7 +101,8 @@ class InitRobenvCommand(Command):
 
         robenv.rosdep.init()
         _logger.info("rosdep init:\tsuccess")
-        robenv.rosdep.update(ros_distro)
+        robenv.rosdep.update(ros.distro)
         _logger.info("rosdep update:\tsuccess")
 
         return 0
+
