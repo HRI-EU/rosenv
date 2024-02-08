@@ -411,12 +411,12 @@ files = []
 
 [[package]]
 name = "empy"
-version = "3.3.4"
+version = "4.0.1"
 description = "A templating system for Python."
 optional = false
 python-versions = "*"
 files = [
-    {file = "empy-3.3.4.tar.gz", hash = "sha256:73ac49785b601479df4ea18a7c79bc1304a8a7c34c02b9472cf1206ae88f01b3"},
+    {file = "empy-4.0.1.tar.gz", hash = "sha256:623237b98cd643be5e20bad6275cc933ffe7cf76452392f1d326d7672c2abd64"},
 ]
 
 [[package]]
