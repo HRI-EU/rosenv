@@ -42,6 +42,7 @@ from rosenv.commands.util import get_default_ros_path
 from rosenv.commands.util import verify_existing_paths
 from rosenv.environment.distro import parse_distro
 from rosenv.environment.initialize import initialize
+from rosenv.ros.ros import ROS
 
 
 _logger = getLogger(__name__)
@@ -53,7 +54,7 @@ class InitRosenvCommand(Command):
     options = [
         option(
             "ros-path",
-            description="Where is your ros-installation located?",
+            description="Where is your ros-installation located? Or only for ros 2: provide a link or path to a tar.gz.",
             default=get_default_ros_path(),
             flag=False,
             value_required=True,
@@ -75,11 +76,9 @@ class InitRosenvCommand(Command):
     def handle(self) -> int:
         if self.option("ros-path") is None:
             raise NoRosInstallationDetectedError
+        ros = ROS(str(self.option("ros-path")))
 
-        ros_path = Path(self.option("ros-path"))
-
-        ros_distro = parse_distro(ros_path.name)
-        _logger.info("Initializing rosenv with ROS distribution: <fg=green>%s</>\n", ros_distro)
+        _logger.info("Initializing rosenv with ROS distribution: <fg=green>%s</>\n", ros.distro)
 
         rosdep_path = None
         if self.option("rosdep-path") is not None:
@@ -90,8 +89,8 @@ class InitRosenvCommand(Command):
         verify_existing_paths(workspace_path)
 
         rosenv = initialize(
-            ros_path=ros_path,
-            ros_distro=ros_distro,
+            ros_path=ros.path,
+            ros_distro=ros.distro,
             rosdep_path=rosdep_path,
             workspace_path=workspace_path,
         )
@@ -99,7 +98,7 @@ class InitRosenvCommand(Command):
 
         rosenv.rosdep.init()
         _logger.info("rosdep init:\tsuccess")
-        rosenv.rosdep.update(ros_distro)
+        rosenv.rosdep.update(ros.distro)
         _logger.info("rosdep update:\tsuccess")
 
         return 0

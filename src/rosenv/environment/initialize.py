@@ -64,7 +64,7 @@ class RosEnvInitConfig:
 
     @property
     def rosenv_ros_path(self) -> Path:
-        return self.rosenv_path / self.ros_path.relative_to(self.ros_path.root)
+        return self.rosenv_path / "opt/ros" / self.ros_distro
 
     @property
     def rosenv_cache_path(self) -> Path:
