@@ -31,20 +31,17 @@
 #
 from __future__ import annotations
 
-from pathlib import Path
-
-from rosenv.environment.distro import parse_distro
-
-from rosenv.commands.util import verify_existing_paths
-
-from rosenv.environment.initialize import initialize
 from logging import getLogger
+from pathlib import Path
 
 from cleo.commands.command import Command
 from cleo.helpers import option
 
 from robenv.commands.util import NoRosInstallationDetectedError
 from robenv.commands.util import get_default_ros_path
+from rosenv.commands.util import verify_existing_paths
+from rosenv.environment.distro import parse_distro
+from rosenv.environment.initialize import initialize
 from robenv.rob.rob import ROS
 
 
@@ -57,7 +54,7 @@ class InitRobenvCommand(Command):
     options = [
         option(
             "ros-path",
-            description="Where is your ros-installation located?",
+            description="Where is your ros-installation located? Or only for ros 2: provide a link or path to a tar.gz.",
             default=get_default_ros_path(),
             flag=False,
             value_required=True,
@@ -105,4 +102,3 @@ class InitRobenvCommand(Command):
         _logger.info("rosdep update:\tsuccess")
 
         return 0
-
