@@ -30,13 +30,14 @@ class ROS:
 
     def __init__(self, path: str) -> None:
         cache_path = Path.home() / ".cache/rosenv"
-        if os.environ.get("XDG_HOME"):
-            cache_path = Path(os.environ.get("XDG_HOME")) / "rosenv"
+        xdg_home = os.environ.get("XDG_HOME")
+        if xdg_home is not None:
+            cache_path = Path(xdg_home) / "rosenv"
 
         if "http" in path or "tar.gz" in path:
             self.distro = parse_distro("humble")
             self._archive_path = cache_path / path.split("/")[-1]
-            self._distro_path = self._archive_path.name.split(".")[0]
+            self._distro_path = cache_path / path.split("/")[-1].split(".")[0]
             cache_path.mkdir(parents=True, exist_ok=True)
             if "http" in path:
                 self._download(path)
@@ -63,7 +64,7 @@ class ROS:
             self._archive_path.write_bytes(download.content)
             _logger.debug("saved %s at %s", self._distro_path.name, str(self._archive_path))
 
-    def _install(self) -> Path:
+    def _install(self) -> None:
         if not self._distro_path.exists():
             self._distro_path.mkdir(parents=True, exist_ok=True)
             run_command(command=f"tar xfvj {self._archive_path.as_posix()} -C {self._distro_path}", cwd=Path.cwd())
