@@ -16,12 +16,6 @@ from rosenv.environment.run_command import run_command
 _logger = getLogger(__name__)
 
 
-# ROS2 Release Links:
-# https://github.com/ros2/ros2/releases/download/release-humble-20231122/ros2-humble-20231122-linux-jammy-amd64.tar.bz2
-# https://github.com/ros2/ros2/releases/download/release-iron-20231120/ros2-iron-20231120-linux-jammy-amd64.tar.bz2
-# https://github.com/ros2/ros2/releases/download/release-foxy-20230620/ros2-foxy-20230620-linux-focal-amd64.tar.bz2
-
-
 class ROS:
     path: Path
     distro: RosDistribution
@@ -35,9 +29,16 @@ class ROS:
             cache_path = Path(xdg_home) / "rosenv"
 
         if "http" in path or "tar.gz" in path:
-            self.distro = parse_distro("humble")
-            self._archive_path = cache_path / path.split("/")[-1]
-            self._distro_path = cache_path / path.split("/")[-1].split(".")[0]
+            if "ros2" not in path:
+                raise ValueError(
+                    "possible no ros2 archive, get a possible link/file from https://github.com/ros2/ros2/releases"
+                )
+            file_name = path.split("/")[-1]
+            file_name_split = file_name.split("-")
+            distro = file_name_split[1]
+            self.distro = parse_distro(distro)
+            self._archive_path = cache_path / file_name
+            self._distro_path = cache_path / file_name.split(".")[0]
             cache_path.mkdir(parents=True, exist_ok=True)
             if "http" in path:
                 self._download(path)
