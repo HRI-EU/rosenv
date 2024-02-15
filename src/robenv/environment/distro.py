@@ -91,6 +91,7 @@ ROS1_DEFAULT_CONFIG = DistroConfig(
 ROS2_DEFAULT_CONFIG = DistroConfig(
     files_to_copy=(
         "_local_setup_util_sh.py",
+        "_local_setup_util.py",
         "local_setup.bash",
         "local_setup.sh",
         "local_setup.zsh",
@@ -111,6 +112,7 @@ ROS2_DEFAULT_CONFIG = DistroConfig(
     builder_tool_variable_name="AMENT_CURRENT_PREFIX",
     meta_package_prevent_overwrite=(
         "_local_setup_util_sh.py",
+        "_local_setup_util.py",
         "local_setup.bash",
         "local_setup.sh",
         "local_setup.zsh",

@@ -74,7 +74,7 @@ class RobEnvShell:
         return run_command(self.command_in_env(command), events=events, cwd=cwd)
 
     def command_in_env(self, command: str) -> str:
-        return f"bash -c 'source {self._get_activate_script('bash')!s} && {command}'"
+        return f"sh -c 'source {self._get_activate_script('sh')!s} && {command}'"
 
     def spawn(self) -> int:
         shell = self._get_shell()

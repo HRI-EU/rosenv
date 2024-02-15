@@ -31,6 +31,7 @@
 #
 from __future__ import annotations
 
+import os
 from contextlib import suppress
 from dataclasses import dataclass
 from logging import getLogger
@@ -86,15 +87,22 @@ def _copy_ros_files(
     distribution: RosDistribution,
 ) -> None:
     for setup_name in get_distro_config(distribution).files_to_copy:
-        _logger.debug(
-            "copying: %s -> %s",
-            str(src / setup_name),
-            str(dest / setup_name),
-        )
-        shutil.copy(
-            src / setup_name,
-            dest / setup_name,
-        )
+        if (src / setup_name).exists():
+            _logger.debug(
+                "copying: %s -> %s",
+                str(src / setup_name),
+                str(dest / setup_name),
+            )
+            shutil.copy(
+                src / setup_name,
+                dest / setup_name,
+            )
+        else:
+            _logger.debug(
+                "file not exists: %s -> %s",
+                str(src / setup_name),
+                str(dest / setup_name),
+            )
 
 
 def _symlink_ros_files(
@@ -106,10 +114,11 @@ def _symlink_ros_files(
     for setup_name in distro_config.files_to_link:
         ros_file = config.ros_path / setup_name
         _logger.debug("creating symlink: %s -> %s", robenv_path / setup_name, ros_file)
-        (robenv_path / setup_name).symlink_to(
-            ros_file,
-            target_is_directory=False,
-        )
+        if ros_file.exists():
+            (robenv_path / setup_name).symlink_to(
+                ros_file,
+                target_is_directory=False,
+            )
 
 
 def _create_new_files(config: RobEnvInitConfig) -> None:

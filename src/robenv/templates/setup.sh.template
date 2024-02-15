@@ -1,5 +1,6 @@
 #!/bin/sh
 
+export ROS_DISTRO=$distribution
 : $${$variable_name:=$ros_folder}
-. /opt/ros/$distribution/setup.sh
+. $ros_folder/$distribution/setup.sh
 . $activate_file
