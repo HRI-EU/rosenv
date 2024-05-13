@@ -31,6 +31,7 @@
 #
 from __future__ import annotations
 
+from dataclasses import dataclass
 from logging import getLogger
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -61,6 +62,12 @@ class NoDownloadUrlError(Exception):
         )
 
 
+@dataclass
+class Candidates:
+    name: str
+    path: Path
+
+
 class AddCommand(Command):
     name = "add"
     description = "Add debian package into the robenv"
@@ -71,6 +78,7 @@ class AddCommand(Command):
             "non-translated package-name. Basically exactly what it's named "
             "in its package.xml",
             multiple=False,
+            optional=True,
         ),
         argument(
             "path_or_url",
@@ -81,12 +89,22 @@ class AddCommand(Command):
     ]
     options = [
         option(
+            "find-in-folder",
+            description="try to find dep files in a folder",
+        ),
+        option(
+            "ask-for-name",
+            description="ask if name is correct for find-in-folder option",
+        ),
+        option(
             "overwrite",
             description="Overwrite (maybe) existing installation",
+            flag=True,
         ),
         option(
             "skip-dependency-check",
             description="Skip checking for dependencies of the deb-file",
+            flag=True,
         ),
     ]
 
@@ -126,36 +144,59 @@ class AddCommand(Command):
         robenv = RobEnv()
         package_name = self.argument("name")
         path_or_url = self.argument("path_or_url")
+        find_in_folder = self.option("find-in-folder")
+        ask_for_name = self.option("ask-for-name")
         check_dependencies = not self.option("skip-dependency-check")
 
-        if path_or_url:
-            if "://" in path_or_url:
-                _logger.info("Installing from url: %s", path_or_url)
-                deb_file_path = self._download(str(path_or_url))
-            else:
-                _logger.info("Installing from deb file path: %s", path_or_url)
-                deb_file_path = Path(path_or_url)
-        else:
-            _logger.info("Installing from package name: %s", package_name)
-            deb_file_path = self._download(str(package_name))
-
-        if not deb_file_path.exists():
-            _logger.error("deb file: %s doesn't exist", str(deb_file_path))
+        if not any[path_or_url, package_name, find_in_folder]:
+            _logger.error("please provide more arguments")
             return 3
 
-        _logger.info("Installing %s", package_name)
-        try:
-            installable = Installable(package_name, DebName(deb_file_path.name), deb_file_path)
-            robenv.install(installable, overwrite=self.option("overwrite"), check_dependencies=check_dependencies)
-            _logger.info("install %s was successful", deb_file_path.name)
-        except CommandAbortedError:
-            _logger.exception("install %s aborted", package_name)
-            return 2
-        except CommandFailedError as e:
-            _logger.exception("Command failed unexpectedly")
-            write_log(robenv.path, package_name, e.output)
-            _logger.exception("install %s failed", package_name)
-            return 1
-        # for NOTUSED see https://github.com/python-poetry/cleo/issues/130
-        self.call("rosdep add", f"NOTUSED {package_name} {parse_filename(deb_file_path.name).name}")
+        candidates: list[Candidates] = []
+        if path_or_url and package_name and not find_in_folder:
+            if "://" in path_or_url:
+                _logger.info("Installing from url: %s", path_or_url)
+                candidates.append(Candidates(package_name, self._download(str(path_or_url))))
+            else:
+                _logger.info("Installing from deb file path: %s", path_or_url)
+                candidates.append(Candidates(package_name, Path(path_or_url)))
+
+        elif not path_or_url and package_name and not find_in_folder:
+            _logger.info("Installing from package name: %s", package_name)
+            candidates.append(Candidates(package_name, self._download(str(package_name))))
+
+        elif not path_or_url and not package_name and find_in_folder:
+            _logger.info("Try to find deb files in: %s", find_in_folder)
+            files = Path(find_in_folder).glob("*.deb")
+            for file in files:
+                name = file.name.split("_")[0]
+                new_name = ""
+                if ask_for_name:
+                    new_name = input(f"Found name [{name}] for {file.name} Press enter to Accept or enter new Name:")
+                candidates.append(Candidates(new_name if new_name else name, file))
+
+        else:
+            _logger.error("no argument combination i can process")
+            return 3
+
+        for candidate in candidates:
+            if not candidates[1].exists():
+                _logger.error("deb file: %s doesn't exist", str(candidate.path))
+                return 3
+
+            _logger.info("Installing %s", candidate.name)
+            try:
+                installable = Installable(candidate.name, DebName(candidate.path.name), candidate.path)
+                robenv.install(installable, overwrite=self.option("overwrite"), check_dependencies=check_dependencies)
+                _logger.info("install %s was successful", candidate.path.name)
+            except CommandAbortedError:
+                _logger.exception("install %s aborted", candidate.name)
+                return 2
+            except CommandFailedError as e:
+                _logger.exception("Command failed unexpectedly")
+                write_log(robenv.path, candidate.name, e.output)
+                _logger.exception("install %s failed", candidate.name)
+                return 1
+            # for NOTUSED see https://github.com/python-poetry/cleo/issues/130
+            self.call("rosdep add", f"NOTUSED {candidate.name} {parse_filename(candidate.path.name).name}")
         return 0
