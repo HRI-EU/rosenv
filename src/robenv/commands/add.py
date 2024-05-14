@@ -46,9 +46,11 @@ from deb_pkg_tools.package import parse_filename
 from robenv.environment.env import DebName
 from robenv.environment.env import Installable
 from robenv.environment.env import RobEnv
+from rosenv.environment.env import UnmetDependencyError
 from robenv.environment.run_command import CommandAbortedError
 from robenv.environment.run_command import CommandFailedError
 from robenv.environment.run_command import run_command
+from rosenv.ros_package.package import PackageName
 from robenv.util.file_logger import write_log
 
 
@@ -73,25 +75,12 @@ class AddCommand(Command):
     description = "Add debian package into the robenv"
     arguments = [
         argument(
-            "name",
-            description="If it's a ROS package this should be the "
-            "non-translated package-name. Basically exactly what it's named "
-            "in its package.xml",
-            multiple=False,
-            optional=True,
-        ),
-        argument(
-            "path_or_url",
-            description="Path to the deb-file or url where to download it from",
-            multiple=False,
-            optional=True,
+            "path_or_url_or_name",
+            description="List of: Path to the deb-file or url where to download it from or just the name of a package",
+            multiple=True,
         ),
     ]
     options = [
-        option(
-            "find-in-folder",
-            description="try to find dep files in a folder",
-        ),
         option(
             "ask-for-name",
             description="ask if name is correct for find-in-folder option",
@@ -140,53 +129,47 @@ class AddCommand(Command):
             url = self._get_apt_url(name_or_url)
         return self._download_deb_file(url)
 
-    def handle(self) -> int:
+    def handle(self) -> int:  # noqa: C901, PLR0912
         robenv = RobEnv()
-        package_name = self.argument("name")
-        path_or_url = self.argument("path_or_url")
-        find_in_folder = self.option("find-in-folder")
+
+        path_or_url_or_name: list[str] = self.argument("path_or_url_or_name")
         ask_for_name = self.option("ask-for-name")
         check_dependencies = not self.option("skip-dependency-check")
 
-        if not any[path_or_url, package_name, find_in_folder]:
-            _logger.error("please provide more arguments")
-            return 3
-
         candidates: list[Candidates] = []
-        if path_or_url and package_name and not find_in_folder:
-            if "://" in path_or_url:
-                _logger.info("Installing from url: %s", path_or_url)
-                candidates.append(Candidates(package_name, self._download(str(path_or_url))))
-            else:
-                _logger.info("Installing from deb file path: %s", path_or_url)
-                candidates.append(Candidates(package_name, Path(path_or_url)))
 
-        elif not path_or_url and package_name and not find_in_folder:
-            _logger.info("Installing from package name: %s", package_name)
-            candidates.append(Candidates(package_name, self._download(str(package_name))))
+        for pun in path_or_url_or_name:
+            try:
+                if "://" in pun:
+                    _logger.info("Installing from url: %s", pun)
+                    file_path = self._download(str(pun))
+                elif pun.endswith(".deb"):
+                    _logger.info("Installing from deb file path: %s", pun)
+                    file_path = Path(pun)
+                else:
+                    _logger.info("Installing from package name: %s", pun)
+                    file_path = self._download(str(pun))
 
-        elif not path_or_url and not package_name and find_in_folder:
-            _logger.info("Try to find deb files in: %s", find_in_folder)
-            files = Path(find_in_folder).glob("*.deb")
-            for file in files:
-                name = file.name.split("_")[0]
+                _logger.info("file_path: %s", file_path)
+                package_name = file_path.name.split("_")[0]
+                _logger.info("package_name: %s", package_name)
                 new_name = ""
                 if ask_for_name:
-                    new_name = input(f"Found name [{name}] for {file.name} Press enter to Accept or enter new Name:")
-                candidates.append(Candidates(new_name if new_name else name, file))
-
-        else:
-            _logger.error("no argument combination i can process")
-            return 3
+                    new_name = input(
+                        f"Found name [{package_name}] for {file_path.name} Press enter to Accept or enter new Name:",
+                    )
+                candidates.append(Candidates(new_name if new_name else package_name, file_path))
+            except NoDownloadUrlError:  # noqa: PERF203
+                _logger.exception("Installing package failed. Arg: %s", path_or_url_or_name)
 
         for candidate in candidates:
-            if not candidates[1].exists():
+            if not candidate.path.exists():
                 _logger.error("deb file: %s doesn't exist", str(candidate.path))
                 return 3
 
             _logger.info("Installing %s", candidate.name)
             try:
-                installable = Installable(candidate.name, DebName(candidate.path.name), candidate.path)
+                installable = Installable(PackageName(candidate.name), DebName(candidate.path.name), candidate.path)
                 robenv.install(installable, overwrite=self.option("overwrite"), check_dependencies=check_dependencies)
                 _logger.info("install %s was successful", candidate.path.name)
             except CommandAbortedError:
@@ -197,6 +180,8 @@ class AddCommand(Command):
                 write_log(robenv.path, candidate.name, e.output)
                 _logger.exception("install %s failed", candidate.name)
                 return 1
+            except UnmetDependencyError:
+                _logger.exception("UnmetDependencyError for package %s", candidate.name)
             # for NOTUSED see https://github.com/python-poetry/cleo/issues/130
             self.call("rosdep add", f"NOTUSED {candidate.name} {parse_filename(candidate.path.name).name}")
         return 0
