@@ -1,3 +1,7 @@
+<p align="center" width="100%">
+    <img height="300x" src="assets/robenv_white_background.png"/>
+</p>
+
 # Robenv - Lightweight ROS System Installation Tool
 
 Welcome to Robenv, a lightweight Command-Line Interface (CLI) tool designed to
