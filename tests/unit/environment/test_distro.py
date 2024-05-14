@@ -35,10 +35,10 @@ from pathlib import Path
 
 import pytest
 
-from rosenv.environment.distro import UnknownRosDistributionError
-from rosenv.environment.distro import get_installed_distro_paths
-from rosenv.environment.distro import is_eol_distro
-from rosenv.environment.distro import parse_distro
+from robenv.environment.distro import UnknownRosDistributionError
+from robenv.environment.distro import get_installed_distro_paths
+from robenv.environment.distro import is_eol_distro
+from robenv.environment.distro import parse_distro
 
 
 def test_parse_distro_should_return_known_distro_unchanged() -> None:

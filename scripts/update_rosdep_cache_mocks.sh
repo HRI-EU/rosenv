@@ -54,18 +54,18 @@ updateRosdepMocks() {
 
     mock_location="${PWD}/tests/resources/rosdep_mocks"
     (
-        log "Initializing rosenv in example_project..."
+        log "Initializing robenv in example_project..."
         cd "$example_project" || exit 1
 
-        if ! poetry run rosenv init; then
-            errorLog "Initializing rosenv failed, aborting..."
+        if ! poetry run robenv init; then
+            errorLog "Initializing robenv failed, aborting..."
             exit 2
         fi
 
-        poetry run rosenv rosdep add nodeps nodeps
-        poetry run rosenv rosdep add dep-on-nodeps dep-on-nodeps --run-update
+        poetry run robenv rosdep add nodeps nodeps
+        poetry run robenv rosdep add dep-on-nodeps dep-on-nodeps --run-update
 
-        rosdep_cache="${PWD}/rosenv/cache/ros/rosdep/"
+        rosdep_cache="${PWD}/robenv/cache/ros/rosdep/"
         if [[ ! -d ${rosdep_cache} ]]; then
             errorLog "Couldn't find rosdep cache files at: ${rosdep_cache}"
             exit 3
@@ -77,8 +77,8 @@ updateRosdepMocks() {
         log "Copying new mocks into place"
         cp -rv "$rosdep_cache"/* "$mock_location"
 
-        log "Deleting created rosenv"
-        rm -rf rosenv
+        log "Deleting created robenv"
+        rm -rf robenv
     )
 
     log "Update done, don't forget to commit the update"

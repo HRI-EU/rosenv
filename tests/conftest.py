@@ -39,11 +39,11 @@ from typing import TypeVar
 
 import pytest
 
-from rosenv.environment.distro import ROS1_DEFAULT_CONFIG
-from rosenv.environment.distro import ROS2_DEFAULT_CONFIG
-from rosenv.environment.distro import DistroConfig
-from rosenv.environment.distro import RosDistribution
-from rosenv.environment.distro import get_installed_distro_paths
+from robenv.environment.distro import ROS1_DEFAULT_CONFIG
+from robenv.environment.distro import ROS2_DEFAULT_CONFIG
+from robenv.environment.distro import DistroConfig
+from robenv.environment.distro import RosDistribution
+from robenv.environment.distro import get_installed_distro_paths
 
 
 _T = TypeVar("_T")

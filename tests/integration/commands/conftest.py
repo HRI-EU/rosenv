@@ -87,9 +87,9 @@ def dep_on_nodeps(test_debs: Path) -> Path:
 
 @pytest.fixture(autouse=True)
 def requests_mock(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("rosenv.commands.add.requests")
+    return mocker.patch("robenv.commands.add.requests")
 
 
 @pytest.fixture(autouse=True)
 def run_command_mock(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("rosenv.commands.add.run_command")
+    return mocker.patch("robenv.commands.add.run_command")

@@ -35,11 +35,11 @@ from pathlib import Path
 
 import pytest
 
-from rosenv.commands.util import PathDoesNotExistError
-from rosenv.commands.util import get_catkin_tools_folder
-from rosenv.commands.util import get_optional_profile
-from rosenv.commands.util import verify_existing_paths
-from rosenv.util.paths import remove_slash_prefix
+from robenv.commands.util import PathDoesNotExistError
+from robenv.commands.util import get_catkin_tools_folder
+from robenv.commands.util import get_optional_profile
+from robenv.commands.util import verify_existing_paths
+from robenv.util.paths import remove_slash_prefix
 
 
 def test_get_optional_profile_should_give_empty_profile_when_no_name_given(tmp_path: Path) -> None:
@@ -83,19 +83,19 @@ def test_verify_existing_paths_finds_non_existing_paths(tmp_path: Path) -> None:
     assert error.value.path == file_list[-1]
 
 
-def test_get_catkin_folder_should_get_folder_on_the_same_level_as_rosenv() -> None:
-    rosenv_path = Path()
+def test_get_catkin_folder_should_get_folder_on_the_same_level_as_robenv() -> None:
+    robenv_path = Path()
 
-    assert get_catkin_tools_folder(rosenv_path) == (rosenv_path.parent / ".catkin_tools").absolute()
+    assert get_catkin_tools_folder(robenv_path) == (robenv_path.parent / ".catkin_tools").absolute()
 
 
 def test_get_catkin_folder_should_get_overwritten_by_argument() -> None:
-    rosenv_path = Path()
+    robenv_path = Path()
     catkin_folder = "test_catkin_folder"
 
     assert (
         get_catkin_tools_folder(
-            rosenv_path,
+            robenv_path,
             catkin_folder,
         )
         == Path("test_catkin_folder").absolute()
@@ -103,11 +103,11 @@ def test_get_catkin_folder_should_get_overwritten_by_argument() -> None:
 
 
 def test_get_catkin_folder_should_return_absolute_paths() -> None:
-    rosenv_path = Path()
-    assert get_catkin_tools_folder(rosenv_path).is_absolute()
+    robenv_path = Path()
+    assert get_catkin_tools_folder(robenv_path).is_absolute()
 
     catkin_folder = "test_catkin_folder"
-    assert get_catkin_tools_folder(rosenv_path, catkin_folder).is_absolute()
+    assert get_catkin_tools_folder(robenv_path, catkin_folder).is_absolute()
 
 
 def test_remove_slash_prefix() -> None:

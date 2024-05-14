@@ -1,22 +1,22 @@
-# Rosenv - Lightweight ROS System Installation Tool
+# Robenv - Lightweight ROS System Installation Tool
 
-Welcome to Rosenv, a lightweight Command-Line Interface (CLI) tool designed to
+Welcome to Robenv, a lightweight Command-Line Interface (CLI) tool designed to
 simplify the installation and management of ROS (Robot Operating System)
-systems. With Rosenv, you can effortlessly create and install ROS systems in a
+systems. With Robenv, you can effortlessly create and install ROS systems in a
 virtual environment without requiring root privileges or relying on git
 submodules. This tool empowers you to easily package and deploy ROS systems,
 enhancing portability and enabling hassle-free development.
 
-By encapsulating the ROS system within a virtual environment, Rosenv isolates
+By encapsulating the ROS system within a virtual environment, Robenv isolates
 the dependencies, ensuring that the installation remains self-contained. This
 approach eliminates conflicts with existing ROS installations or other system
 packages, enabling you to experiment with different ROS configurations or work
 on multiple projects simultaneously without interference.
 
-Rosenv streamlines the process of setting up and managing ROS systems, making it
+Robenv streamlines the process of setting up and managing ROS systems, making it
 an ideal tool for researchers, roboticists, and ROS enthusiasts. Whether you are
 exploring new algorithms, developing robotics applications, or working on
-collaborative projects, Rosenv provides a seamless environment for installing
+collaborative projects, Robenv provides a seamless environment for installing
 and managing ROS systems.
 
 [<img height="80px" src="assets/hri.png"/>](https://honda-ri.de)
@@ -35,21 +35,21 @@ Please follow the [Developer Setup](Developer Setup).
 
 ## Usage
 
-Running `rosenv` without any arguments will print helpful usage documentation.
+Running `robenv` without any arguments will print helpful usage documentation.
 
 Before running any command you have to initialize the virtual environment via
 
 ```bash
-rosenv init
+robenv init
 ```
 
 Initializing the virtual environment requires a local installation of ROS.
-For more information see `rosenv help init`.
+For more information see `robenv help init`.
 
 ## Autocompletion
 
 We ship with a basic autocompletion setup that you can easily enable yourself.
-Take a look at `rosenv help completions` for support on how to enable completion
+Take a look at `robenv help completions` for support on how to enable completion
 for your specific shell.
 
 ## Developer Setup
@@ -103,7 +103,7 @@ rm -rf $(poetry env info --path) && poetry install
 - ROS workspace --> a standard ROS workspace (the thing that contains the src
     folder including multiple packages and can be compiled with catkin)
 - repository --> GIT repo
-- rosenv --> Our own virtual env for ROS (default path rosenv)
+- robenv --> Our own virtual env for ROS (default path robenv)
 - virtualenv --> Python virtual env (venv)
 
 ### Dependencies
@@ -132,11 +132,11 @@ are specified in the package.xml files.
 
 # FAQ
 
-## I did override ROS_HOME because $reason but rosenv breaks this
+## I did override ROS_HOME because $reason but robenv breaks this
 
 Document #52 results
 
-## Why is rosenv a non-hidden folder? Shouldn't `.rosenv` be more in line with python venvs?
+## Why is robenv a non-hidden folder? Shouldn't `.robenv` be more in line with python venvs?
 
 Yes it should be and yes it would be.
 

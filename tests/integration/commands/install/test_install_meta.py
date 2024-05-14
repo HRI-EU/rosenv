@@ -42,16 +42,16 @@ from cleo.testers.command_tester import CommandTester
 from deb_pkg_tools.package import ArchiveEntry
 from deb_pkg_tools.package import inspect_package_contents
 
-from rosenv.environment.distro import DistroConfig
-from rosenv.environment.distro import get_distro_config
+from robenv.environment.distro import DistroConfig
+from robenv.environment.distro import get_distro_config
 from tests.conftest import ROS_2
 from tests.conftest import YieldFixture
 from tests.conftest import get_ros_version
 
 
 @pytest.fixture()
-def _copy_meta_example_project(rosenv_target_path: Path, example_project: Path) -> YieldFixture[None]:
-    target_folder = rosenv_target_path.parent / "src"
+def _copy_meta_example_project(robenv_target_path: Path, example_project: Path) -> YieldFixture[None]:
+    target_folder = robenv_target_path.parent / "src"
     target_folder.mkdir(exist_ok=True, parents=True)
 
     adder_meta_project = example_project / "src/adder_meta"

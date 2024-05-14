@@ -35,7 +35,7 @@ from __future__ import annotations
 
 import pytest
 
-from rosenv.environment.distro import RosDistribution
+from robenv.environment.distro import RosDistribution
 from tests.conftest import ROS_1
 from tests.conftest import ROS_2
 from tests.conftest import get_ros_version

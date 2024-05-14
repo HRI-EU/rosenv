@@ -35,13 +35,13 @@ from pathlib import Path
 
 import pytest
 
-from rosenv.catkin_profile.profile import CatkinProfile
-from rosenv.environment.distro import RosDistribution
-from rosenv.ros_package.workspace import ROSWorkspace
-from rosenv.rosdep.rosdep import ResolvedPackageName
-from rosenv.rosdep.rosdep import Rosdep
-from rosenv.rosdep.rosdep import RosDepDict
-from rosenv.rosdep.rosdep import SystemName
+from robenv.catkin_profile.profile import CatkinProfile
+from robenv.environment.distro import RosDistribution
+from robenv.ros_package.workspace import ROSWorkspace
+from robenv.rosdep.rosdep import ResolvedPackageName
+from robenv.rosdep.rosdep import Rosdep
+from robenv.rosdep.rosdep import RosDepDict
+from robenv.rosdep.rosdep import SystemName
 from tests.conftest import ROS_1
 from tests.conftest import get_ros_version
 

@@ -50,10 +50,10 @@ from tests.conftest import get_ros_version
 
 @pytest.fixture()
 def _copy_success_launch_file_project(
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     example_project_launch_files: Path,
 ) -> YieldFixture[None]:
-    target_folder = rosenv_target_path.parent / "src"
+    target_folder = robenv_target_path.parent / "src"
     target_folder.mkdir(exist_ok=True, parents=True)
 
     failing_project = example_project_launch_files / "src/launch_success"
@@ -69,10 +69,10 @@ def _copy_success_launch_file_project(
 
 @pytest.fixture()
 def _copy_failing_launch_file_project(
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     example_project_launch_files: Path,
 ) -> YieldFixture[None]:
-    target_folder = rosenv_target_path.parent / "src"
+    target_folder = robenv_target_path.parent / "src"
     target_folder.mkdir(exist_ok=True, parents=True)
 
     failing_project = example_project_launch_files / "src/launch_fails"
@@ -136,9 +136,9 @@ def test_launch_detection_should_detect_missing_launch_file_and_log(
     assert not any(file.endswith("/server.launch") for file in contents)
 
     expected_records = [
-        ("rosenv.commands.install", logging.ERROR, "Missing launch files:"),
-        ("rosenv.commands.install", logging.ERROR, "\tlaunch_fails:"),
-        ("rosenv.commands.install", logging.ERROR, "\t\t- launch/server.launch"),
+        ("robenv.commands.install", logging.ERROR, "Missing launch files:"),
+        ("robenv.commands.install", logging.ERROR, "\tlaunch_fails:"),
+        ("robenv.commands.install", logging.ERROR, "\t\t- launch/server.launch"),
     ]
 
     assert len(caplog.records) == len(expected_records)

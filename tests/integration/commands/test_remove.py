@@ -38,35 +38,35 @@ import pytest
 from cleo.application import Application
 from cleo.testers.command_tester import CommandTester
 
-from rosenv.environment.distro import RosDistribution
-from rosenv.environment.env import PackageIsNotInstalledError
-from rosenv.environment.env import RemoveDependencyError
+from robenv.environment.distro import RosDistribution
+from robenv.environment.env import PackageIsNotInstalledError
+from robenv.environment.env import RemoveDependencyError
 from tests.integration.commands import assert_is_installed
 from tests.integration.commands import assert_is_not_installed
 
 
 def test_remove_package(
     init_app: Application,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     ros_distro: RosDistribution,
     nodeps: Path,
 ) -> None:
     CommandTester(init_app.find("add")).execute(f"nodeps {nodeps}")
 
-    assert_is_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_installed(robenv_target_path, nodeps.name, ros_distro)
 
     CommandTester(init_app.find("remove")).execute("nodeps")
 
-    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_not_installed(robenv_target_path, nodeps.name, ros_distro)
 
 
 def test_remove_package_but_not_installed(
     init_app: Application,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     ros_distro: RosDistribution,
     nodeps: Path,
 ) -> None:
-    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_not_installed(robenv_target_path, nodeps.name, ros_distro)
 
     with pytest.raises(PackageIsNotInstalledError):
         CommandTester(init_app.find("remove")).execute("nodeps")
@@ -74,21 +74,21 @@ def test_remove_package_but_not_installed(
 
 def test_remove_package_with_dependents(
     init_app: Application,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     ros_distro: RosDistribution,
     nodeps: Path,
     dep_on_nodeps: Path,
 ) -> None:
     CommandTester(init_app.find("add")).execute(f"nodeps {nodeps!s}")
-    assert_is_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_installed(robenv_target_path, nodeps.name, ros_distro)
     CommandTester(init_app.find("add")).execute(f"dep-on-nodeps {dep_on_nodeps!s}")
-    assert_is_installed(rosenv_target_path, dep_on_nodeps.name, ros_distro)
+    assert_is_installed(robenv_target_path, dep_on_nodeps.name, ros_distro)
 
     with pytest.raises(RemoveDependencyError):
         CommandTester(init_app.find("remove")).execute("nodeps")
 
-    assert_is_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_installed(robenv_target_path, nodeps.name, ros_distro)
 
     CommandTester(init_app.find("remove")).execute("nodeps --force")
 
-    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_not_installed(robenv_target_path, nodeps.name, ros_distro)

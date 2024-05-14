@@ -35,9 +35,9 @@ from pathlib import Path
 
 import pytest
 
-from rosenv.catkin_profile import CatkinProfileNotFoundError
-from rosenv.catkin_profile import get_profile
-from rosenv.catkin_profile import parse_profiles
+from robenv.catkin_profile import CatkinProfileNotFoundError
+from robenv.catkin_profile import get_profile
+from robenv.catkin_profile import parse_profiles
 
 
 def test_parse_profiles_should_get_all_profiles(catkin_tools: Path) -> None:

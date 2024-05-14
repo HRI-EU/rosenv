@@ -9,11 +9,11 @@
 #  ALL RIGHTS RESERVED.
 #
 
-.PHONY: all rosenv
+.PHONY: all robenv
 
 DOCKER_CONTEXT=..
 
-all: rosenv
+all: robenv
 
-rosenv: iron.Dockerfile
+robenv: iron.Dockerfile
 	docker build -t localhost/$@ -f iron.Dockerfile $(DOCKER_CONTEXT)

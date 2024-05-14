@@ -41,23 +41,23 @@ import pytest
 from cleo.application import Application
 from cleo.testers.command_tester import CommandTester
 
-from rosenv.environment.shell import RosEnvShell
+from robenv.environment.shell import RobEnvShell
 from tests.conftest import YieldFixture
 
 
 @pytest.fixture()
 def spawn_mock() -> YieldFixture[MagicMock]:
-    with patch.object(RosEnvShell, "spawn", autospec=True) as spawn:
+    with patch.object(RobEnvShell, "spawn", autospec=True) as spawn:
         yield spawn
 
 
 @pytest.fixture()
 def _simulate_env() -> YieldFixture[None]:
-    os.environ["ROSENV_ENV"] = "/test/path/to/rosenv"
+    os.environ["ROBENV_ENV"] = "/test/path/to/robenv"
 
     yield
 
-    del os.environ["ROSENV_ENV"]
+    del os.environ["ROBENV_ENV"]
 
 
 def test_shell_should_spawn_a_shell_process(
@@ -87,7 +87,7 @@ def test_shell_should_return_spawn_return_code(
 
 
 @pytest.mark.usefixtures("_simulate_env")
-def test_shell_should_detect_if_running_already_in_rosenv(
+def test_shell_should_detect_if_running_already_in_robenv(
     init_app: Application,
     spawn_mock: MagicMock,
 ) -> None:

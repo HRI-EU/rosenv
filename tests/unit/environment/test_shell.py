@@ -38,23 +38,23 @@ import pytest
 
 from pytest_mock import MockerFixture
 
-from rosenv.environment.shell import RosEnvShell
-from rosenv.environment.shell import UnsupportedShellError
+from robenv.environment.shell import RobEnvShell
+from robenv.environment.shell import UnsupportedShellError
 
 
 @pytest.fixture()
 def pexpect_mock(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("rosenv.environment.shell.pexpect")
+    return mocker.patch("robenv.environment.shell.pexpect")
 
 
 @pytest.fixture()
 def run_command_mock(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("rosenv.environment.shell.run_command")
+    return mocker.patch("robenv.environment.shell.run_command")
 
 
 @pytest.fixture()
 def detect_shell_mock(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("rosenv.environment.shell.detect_shell")
+    return mocker.patch("robenv.environment.shell.detect_shell")
 
 
 @pytest.fixture()
@@ -67,7 +67,7 @@ def terminal_size() -> MagicMock:
 
 @pytest.fixture(autouse=True)
 def shutil_mock(mocker: MockerFixture, terminal_size: MagicMock) -> MagicMock:
-    mocked = mocker.patch("rosenv.environment.shell.shutil")
+    mocked = mocker.patch("robenv.environment.shell.shutil")
     mocked.get_terminal_size.return_value = terminal_size
     return mocked
 
@@ -84,7 +84,7 @@ def test_run_command__calls_command_within_env(run_command_mock: MagicMock, acti
 
     # run_command_mock.run.return_value = (b"test_output", expected_exit_status)
 
-    sut = RosEnvShell(activate_script)
+    sut = RobEnvShell(activate_script)
     sut.run(command=test_command, cwd=Path.cwd())
 
     assert run_command_mock.called
@@ -102,10 +102,10 @@ def test_get_shell__raises_on_unsupported_shell(
 ) -> None:
     detect_shell_mock.return_value = "unknown", "unknown"
 
-    rosenv_shell = RosEnvShell(activate_script)
+    robenv_shell = RobEnvShell(activate_script)
 
     with pytest.raises(UnsupportedShellError):
-        rosenv_shell._get_shell()  # noqa: SLF001
+        robenv_shell._get_shell()  # noqa: SLF001
 
     assert not run_command_mock.spawn.called
 
@@ -118,9 +118,9 @@ def test_get_shell__spawns_zsh_shell(
 ) -> None:
     detect_shell_mock.return_value = "zsh", "/path/to/zsh"
 
-    rosenv_shell = RosEnvShell(activate_script)
+    robenv_shell = RobEnvShell(activate_script)
 
-    shell = rosenv_shell._get_shell()  # noqa: SLF001
+    shell = robenv_shell._get_shell()  # noqa: SLF001
 
     assert pexpect_mock.spawn.called
     pexpect_mock.spawn.assert_called_once_with(
@@ -142,9 +142,9 @@ def test_get_shell__spawns_bash_shell(
 ) -> None:
     detect_shell_mock.return_value = "bash", "/path/to/bash"
 
-    rosenv_shell = RosEnvShell(activate_script)
+    robenv_shell = RobEnvShell(activate_script)
 
-    shell = rosenv_shell._get_shell()  # noqa: SLF001
+    shell = robenv_shell._get_shell()  # noqa: SLF001
 
     assert pexpect_mock.spawn.called
     pexpect_mock.spawn.assert_called_once_with(

@@ -37,7 +37,7 @@ import pytest
 
 from cleo.application import Application
 
-from rosenv.environment.distro import RosDistribution
+from robenv.environment.distro import RosDistribution
 
 
 @pytest.fixture()
@@ -49,10 +49,10 @@ def translated_adder(ros_distro: RosDistribution) -> str:
 def rosdep_yaml(
     _copy_minimal_example_project: None,
     init_app: Application,  # noqa: ARG001
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     translated_adder: str,
 ) -> Path:
-    rosdep = rosenv_target_path / "rosdep.yaml"
+    rosdep = robenv_target_path / "rosdep.yaml"
 
     assert (
         rosdep.read_text()

@@ -40,13 +40,13 @@ from cleo.application import Application
 from cleo.testers.command_tester import CommandTester
 from pytest_mock import MockerFixture
 
-from rosenv.commands.add import AddCommand
-from rosenv.commands.add import NoDownloadUrlError
-from rosenv.environment.distro import RosDistribution
-from rosenv.environment.env import FileAlreadyInstalledError
-from rosenv.environment.env import UnmetDependencyError
-from rosenv.environment.run_command import CommandAbortedError
-from rosenv.environment.run_command import CommandFailedError
+from robenv.commands.add import AddCommand
+from robenv.commands.add import NoDownloadUrlError
+from robenv.environment.distro import RosDistribution
+from robenv.environment.env import FileAlreadyInstalledError
+from robenv.environment.env import UnmetDependencyError
+from robenv.environment.run_command import CommandAbortedError
+from robenv.environment.run_command import CommandFailedError
 from tests.integration.commands import MockResponse
 from tests.integration.commands import assert_is_installed
 from tests.integration.commands import assert_is_not_installed
@@ -71,25 +71,25 @@ def download_deb_file_spy(mocker: MockerFixture) -> MagicMock:
 def install_nodeps(
     init_app: Application,
     nodeps: Path,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     ros_distro: RosDistribution,
 ) -> Application:
     code = CommandTester(init_app.find("add")).execute(f"nodeps {nodeps!s}")
     assert code == 0
-    assert_is_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_installed(robenv_target_path, nodeps.name, ros_distro)
     return init_app
 
 
 def test_add_deb_file(
     install_nodeps: Application,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     download_spy: MagicMock,
     get_apt_url_spy: MagicMock,
     download_deb_file_spy: MagicMock,
     ros_distro: RosDistribution,
     dep_on_nodeps: Path,
 ) -> None:
-    assert_is_not_installed(rosenv_target_path, dep_on_nodeps.name, ros_distro)
+    assert_is_not_installed(robenv_target_path, dep_on_nodeps.name, ros_distro)
 
     assert not download_spy.called
     assert not get_apt_url_spy.called
@@ -102,83 +102,83 @@ def test_add_deb_file(
     assert not get_apt_url_spy.called
     assert not download_deb_file_spy.called
 
-    assert_is_installed(rosenv_target_path, dep_on_nodeps.name, ros_distro)
+    assert_is_installed(robenv_target_path, dep_on_nodeps.name, ros_distro)
 
 
 def test_add_deb_file_with_missing_dependency(
     init_app: Application,
     test_debs: Path,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     ros_distro: RosDistribution,
 ) -> None:
     deb_name = "brokendeps_0.0.0_all.deb"
-    assert_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(robenv_target_path, deb_name, ros_distro)
     with pytest.raises(UnmetDependencyError):
         CommandTester(init_app.find("add")).execute(f"brokendeps {test_debs /deb_name}")
-    assert_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(robenv_target_path, deb_name, ros_distro)
 
 
 def test_add_deb_file_with_missing_dependency_and_skip_check(
     init_app: Application,
     test_debs: Path,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     ros_distro: RosDistribution,
 ) -> None:
     deb_name = "brokendeps_0.0.0_all.deb"
-    assert_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(robenv_target_path, deb_name, ros_distro)
     CommandTester(init_app.find("add")).execute(f"brokendeps {test_debs /deb_name} --skip-dependency-check")
-    assert_is_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_installed(robenv_target_path, deb_name, ros_distro)
 
 
 def test_add_deb_file_with_missing_alternative_dependencies(
     init_app: Application,
     test_debs: Path,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     ros_distro: RosDistribution,
 ) -> None:
     deb_name = "brokenalternativesdeps_0.0.0_all.deb"
-    assert_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(robenv_target_path, deb_name, ros_distro)
     with pytest.raises(UnmetDependencyError):
         CommandTester(init_app.find("add")).execute(
             f"brokenalternativesdeps {test_debs /deb_name}",
         )
-    assert_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(robenv_target_path, deb_name, ros_distro)
 
 
 def test_add_deb_file_with_available_alternative(
     install_nodeps: Application,
     test_debs: Path,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     ros_distro: RosDistribution,
 ) -> None:
     deb_name = "alternativedeps_0.0.0_all.deb"
-    assert_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(robenv_target_path, deb_name, ros_distro)
 
     CommandTester(install_nodeps.find("add")).execute(
         f"alternativedeps {test_debs / deb_name}",
     )
 
-    assert_is_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_installed(robenv_target_path, deb_name, ros_distro)
 
 
 def test_add_deb_file_with_unmet_version_dependency(
     install_nodeps: Application,
     test_debs: Path,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     ros_distro: RosDistribution,
 ) -> None:
     deb_name = "unmetversiondep_0.0.0_all.deb"
-    assert_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(robenv_target_path, deb_name, ros_distro)
     with pytest.raises(UnmetDependencyError):
         CommandTester(install_nodeps.find("add")).execute(
             f"unmetversiondep {test_debs /deb_name}",
         )
-    assert_is_not_installed(rosenv_target_path, deb_name, ros_distro)
+    assert_is_not_installed(robenv_target_path, deb_name, ros_distro)
 
 
 def test_add_via_http_url(
     init_app: Application,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     download_spy: MagicMock,
     get_apt_url_spy: MagicMock,
     download_deb_file_spy: MagicMock,
@@ -187,7 +187,7 @@ def test_add_via_http_url(
     requests_mock: MagicMock,
 ) -> None:
     requests_mock.get.return_value = MockResponse(nodeps.read_bytes())
-    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_not_installed(robenv_target_path, nodeps.name, ros_distro)
 
     assert not download_spy.called
     assert not get_apt_url_spy.called
@@ -199,12 +199,12 @@ def test_add_via_http_url(
     assert not get_apt_url_spy.called
     assert download_deb_file_spy.call_count == 1
 
-    assert_is_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_installed(robenv_target_path, nodeps.name, ros_distro)
 
 
 def test_add_via_package_name(
     init_app: Application,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     download_spy: MagicMock,
     get_apt_url_spy: MagicMock,
     download_deb_file_spy: MagicMock,
@@ -215,7 +215,7 @@ def test_add_via_package_name(
 ) -> None:
     requests_mock.get.return_value = MockResponse(nodeps.read_bytes())
     run_command_mock.return_value = f"https://domain.tld/{nodeps.name}"
-    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_not_installed(robenv_target_path, nodeps.name, ros_distro)
 
     assert not download_spy.called
     assert not get_apt_url_spy.called
@@ -227,7 +227,7 @@ def test_add_via_package_name(
     assert get_apt_url_spy.call_count == 1
     assert download_deb_file_spy.call_count == 1
 
-    assert_is_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_installed(robenv_target_path, nodeps.name, ros_distro)
 
 
 def test_add_via_package_name_not_found(
@@ -244,43 +244,43 @@ def test_add_deb_file_install_failed(
     run_mock: MagicMock,
     nodeps: Path,
     init_app: Application,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     ros_distro: RosDistribution,
 ) -> None:
-    assert not (rosenv_target_path / "logs").exists()
-    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert not (robenv_target_path / "logs").exists()
+    assert_is_not_installed(robenv_target_path, nodeps.name, ros_distro)
 
     run_mock.side_effect = CommandFailedError(command="command", exit_status=1, output="cool output")
     expected_return_code = 1
 
     assert CommandTester(init_app.find("add")).execute(f"adder {nodeps!s}") == expected_return_code
 
-    assert (rosenv_target_path / "logs" / "adder.log").exists()
+    assert (robenv_target_path / "logs" / "adder.log").exists()
 
-    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_not_installed(robenv_target_path, nodeps.name, ros_distro)
 
 
 def test_add_deb_file_install_aborted(
     run_mock: MagicMock,
     init_app: Application,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     ros_distro: RosDistribution,
     nodeps: Path,
 ) -> None:
-    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_not_installed(robenv_target_path, nodeps.name, ros_distro)
 
     run_mock.side_effect = CommandAbortedError(command="command", output="cool output")
     expected_return_code = 2
 
     assert CommandTester(init_app.find("add")).execute(f"adder {nodeps!s}") == expected_return_code
 
-    assert_is_not_installed(rosenv_target_path, nodeps.name, ros_distro)
+    assert_is_not_installed(robenv_target_path, nodeps.name, ros_distro)
 
 
 def test_add_shows_source_package_on_file_conflict(
     init_app: Application,
     nodeps: Path,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
 ) -> None:
     CommandTester(init_app.find("add")).execute(
         f"adder {nodeps!s}",
@@ -291,13 +291,13 @@ def test_add_shows_source_package_on_file_conflict(
             f"adder2 {nodeps!s}",
         )
     assert e.value.installed_by_packages == ["adder"]
-    assert e.value.file == rosenv_target_path / "usr/share/doc/nodeps/README.Debian"
+    assert e.value.file == robenv_target_path / "usr/share/doc/nodeps/README.Debian"
 
 
 def test_add_shows_multiple_source_packages_on_file_conflict(
     init_app: Application,
     nodeps: Path,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
 ) -> None:
     CommandTester(init_app.find("add")).execute(
         f"adder {nodeps!s}",
@@ -311,4 +311,4 @@ def test_add_shows_multiple_source_packages_on_file_conflict(
             f"adder3 {nodeps!s}",
         )
     assert e.value.installed_by_packages == ["adder", "adder2"]
-    assert e.value.file == rosenv_target_path / "usr/share/doc/nodeps/README.Debian"
+    assert e.value.file == robenv_target_path / "usr/share/doc/nodeps/README.Debian"

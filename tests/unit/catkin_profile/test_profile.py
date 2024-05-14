@@ -31,7 +31,7 @@
 #
 from __future__ import annotations
 
-from rosenv.catkin_profile import CatkinProfile
+from robenv.catkin_profile import CatkinProfile
 
 
 def test_profile_without_blacklist_should_do_what_it_says() -> None:
