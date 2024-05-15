@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python
 #
 #  Copyright (c) Honda Research Institute Europe GmbH
 #
@@ -31,6 +31,24 @@
 #
 #
 
-set -euo pipefail
+from __future__ import annotations
 
-poetry run mypy
+import subprocess  # noqa: S404
+import sys
+
+
+def main() -> None:
+    try:
+        subprocess.run(
+            ["poetry", "run", "mypy", "src", "tests/unit"],  # noqa: S603, S607
+            check=True,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+        )
+    except subprocess.CalledProcessError as e:
+        print(str(e))
+        raise SystemExit(e.returncode) from e
+
+
+if __name__ == "__main__":
+    main()

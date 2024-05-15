@@ -105,6 +105,7 @@ target-version = "py38"
     "N816", # mixed case variables
 ]
 "tests/resources/*" = ["ALL"]
+"ci-*.py" = ["T201"] # print in ci-scripts
 
 [tool.ruff.isort]
 force-single-line = true

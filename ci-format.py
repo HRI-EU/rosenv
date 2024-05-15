@@ -1,0 +1,107 @@
+#!/usr/bin/env python
+#
+#  Copyright (c) Honda Research Institute Europe GmbH
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions are
+#  met:
+#
+#  1. Redistributions of source code must retain the above copyright notice,
+#     this list of conditions and the following disclaimer.
+#
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#
+#  3. Neither the name of the copyright holder nor the names of its
+#     contributors may be used to endorse or promote products derived from
+#     this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+#  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+#  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+#  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+#  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+#  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+#
+
+from __future__ import annotations
+
+import subprocess  # noqa: S404
+import sys
+
+from argparse import ArgumentParser
+
+
+def main() -> None:
+    arg_parse = ArgumentParser()
+    arg_parse.add_argument(
+        "--check",
+        action="store_true",
+        help="Only check for errors, don't fix them",
+    )
+    arg_parse.add_argument(
+        "files",
+        metavar="FILES",
+        nargs="*",
+        type=str,
+        default=["."],
+        help="files to check",
+    )
+
+    args = arg_parse.parse_args()
+
+    check_option = ["--diff"] if args.check else ["--fix"]
+    format_option = ["--check", "--diff"] if args.check else []
+
+    check_error = None
+    try:
+        subprocess.run(
+            [  # noqa: S603, S607
+                "poetry",
+                "run",
+                "ruff",
+                "check",
+                "--select",
+                "I001,I002",
+                *check_option,
+                *args.files,
+            ],
+            check=True,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+        )
+    except subprocess.CalledProcessError as e:
+        check_error = e
+
+    format_error = None
+    try:
+        subprocess.run(
+            ["poetry", "run", "ruff", "format", *format_option, *args.files],  # noqa: S603, S607
+            check=True,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+        )
+    except subprocess.CalledProcessError as e:
+        format_error = e
+
+    exit_code = 0
+    if check_error is not None:
+        print(str(check_error))
+        exit_code += check_error.returncode
+
+    if format_error is not None:
+        print(str(format_error))
+        exit_code += format_error.returncode
+
+    raise SystemExit(exit_code)
+
+
+if __name__ == "__main__":
+    main()
