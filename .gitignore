@@ -27,3 +27,5 @@ venv
 
 robenv
 !src/robenv
+!tests/resources/locate_robenv_tree/robenv
+
