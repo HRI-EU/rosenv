@@ -39,11 +39,11 @@ from typing import TypeVar
 
 import pytest
 
-from robenv.environment.distro import ROS1_DEFAULT_CONFIG
-from robenv.environment.distro import ROS2_DEFAULT_CONFIG
 from robenv.environment.distro import DistroConfig
 from robenv.environment.distro import RosDistribution
+from robenv.environment.distro import get_distro_config
 from robenv.environment.distro import get_installed_distro_paths
+from robenv.environment.distro import parse_distro
 
 
 _T = TypeVar("_T")
@@ -64,18 +64,16 @@ def get_ros_version() -> Literal[1, 2]:
 
 @pytest.fixture()
 def ros_distro() -> RosDistribution:
-    if get_ros_version() == ROS_1:
-        return "noetic"
-
-    return "iron"
+    ros_name = get_installed_distro_paths()
+    if len(ros_name) == 0:
+        msg = "No ROS installation detected on system!"
+        raise AssertionError(msg)
+    return parse_distro(ros_name[0].name)
 
 
 @pytest.fixture()
-def ros_distro_config() -> DistroConfig:
-    if get_ros_version() == ROS_1:
-        return ROS1_DEFAULT_CONFIG
-
-    return ROS2_DEFAULT_CONFIG
+def ros_distro_config(ros_distro: RosDistribution) -> DistroConfig:
+    return get_distro_config(ros_distro)
 
 
 @pytest.fixture()

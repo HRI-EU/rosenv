@@ -39,44 +39,45 @@ import pytest
 from cleo.application import Application
 from cleo.testers.command_tester import CommandTester
 
+from robenv.environment.distro import RosDistribution
 from robenv.environment.run_command import CommandFailedError
-from tests.conftest import ROS_1
-from tests.conftest import get_ros_version
 from tests.integration.commands import create_cache_files_in_adder_project
 
 
-def _get_adder_lib_location(robenv_target_path: Path) -> Path:
-    if get_ros_version() == ROS_1:
-        return robenv_target_path / "opt/ros/noetic/lib/libadder.so"
-
-    return robenv_target_path / "opt/ros/iron/lib/x86_64-linux-gnu/libadder.a"
-
-
-def _get_adder_header_location(robenv_target_path: Path) -> Path:
-    if get_ros_version() == ROS_1:
-        return robenv_target_path / "opt/ros/noetic/include/adder/adder.h"
-
-    return robenv_target_path / "opt/ros/iron/include/adder/adder.h"
+@pytest.fixture()
+def adder_lib_location(robenv_target_path: Path, ros_distro: RosDistribution) -> Path:
+    return (
+        robenv_target_path
+        / f"opt/ros/{ros_distro}/lib/{'libadder.so' if ros_distro == 'noetic' else 'x86_64-linux-gnu/libadder.a'}"
+    )
 
 
-def _get_adder_deb_name() -> str:
-    if get_ros_version() == ROS_1:
-        return "ros-noetic-adder_0.0.0-0focal_amd64.deb"
-
-    return "ros-iron-adder_0.0.0-0jammy_amd64.deb"
+@pytest.fixture()
+def adder_header_location(robenv_target_path: Path, ros_distro: RosDistribution) -> Path:
+    return robenv_target_path / f"opt/ros/{ros_distro}/include/adder/adder.h"
 
 
-def build_and_install(app: Application, robenv_target_path: Path, ros_workspace_path: Path, dist_path: Path) -> None:
+@pytest.fixture()
+def adder_deb_name(ros_distro: RosDistribution) -> str:
+    return f"ros-{ros_distro}-adder_0.0.0-0{'focal' if ros_distro == 'noetic' else 'jammy'}_amd64.deb"
+
+
+def build_and_install(
+    app: Application,
+    robenv_target_path: Path,
+    ros_workspace_path: Path,
+    dist_path: Path,
+    adder_deb_name: str,
+    adder_lib_location: Path,
+    adder_header_location: Path,
+) -> None:
     debian_folder_path = ros_workspace_path / "adder" / "debian"
     obj_cache_path = ros_workspace_path / "adder" / ".obj-x86_64-linux-gnu"
 
-    deb_name = _get_adder_deb_name()
     packages_folder = robenv_target_path / "robenv/packages"
     assert not packages_folder.exists()
-    header = _get_adder_header_location(robenv_target_path)
-    assert not header.exists()
-    lib = _get_adder_lib_location(robenv_target_path)
-    assert not lib.exists()
+    assert not adder_header_location.exists()
+    assert not adder_lib_location.exists()
 
     create_cache_files_in_adder_project(ros_workspace_path)
     assert debian_folder_path.exists()
@@ -87,82 +88,92 @@ def build_and_install(app: Application, robenv_target_path: Path, ros_workspace_
     assert not debian_folder_path.exists()
     assert not obj_cache_path.exists()
 
-    assert (dist_path / deb_name).exists()
-    assert (packages_folder / deb_name).exists()
-    assert header.exists()
-    assert lib.exists()
+    assert (dist_path / adder_deb_name).exists()
+    assert (packages_folder / adder_deb_name).exists()
+    assert adder_header_location.exists()
+    assert adder_lib_location.exists()
 
 
-def build_and_install_overwrite(app: Application, robenv_target_path: Path, dist_path: Path) -> None:
-    header = _get_adder_header_location(robenv_target_path)
-    assert header.exists()
-    header_creation_timestamp = header.stat().st_ctime
-    build_artifact = dist_path / _get_adder_deb_name()
+def build_and_install_overwrite(
+    app: Application,
+    dist_path: Path,
+    adder_deb_name: str,
+    adder_header_location: Path,
+) -> None:
+    assert adder_header_location.exists()
+    header_creation_timestamp = adder_header_location.stat().st_ctime
+    build_artifact = dist_path / adder_deb_name
     assert build_artifact.exists()
     artifact_creation_timestamp = build_artifact.stat().st_ctime
 
     CommandTester(app.find("install")).execute(f"src --dist-folder={dist_path.name}")
 
-    assert header.exists()
-    header_recreate_timestamp = header.stat().st_ctime
+    assert adder_header_location.exists()
+    header_recreate_timestamp = adder_header_location.stat().st_ctime
     assert header_recreate_timestamp > header_creation_timestamp
     assert build_artifact.exists()
     artifact_recreate_timestamp = build_artifact.stat().st_ctime
     assert artifact_recreate_timestamp > artifact_creation_timestamp
 
 
-def build_and_install_no_overwrite(app: Application, robenv_target_path: Path, dist_path: Path) -> None:
+def build_and_install_no_overwrite(
+    app: Application,
+    adder_deb_name: str,
+    adder_header_location: Path,
+) -> None:
     dist_path = Path("dist")
-    header = _get_adder_header_location(robenv_target_path)
-    assert header.exists()
-    header_creation_timestamp = header.stat().st_ctime
-    build_artifact = dist_path / _get_adder_deb_name()
+    assert adder_header_location.exists()
+    header_creation_timestamp = adder_header_location.stat().st_ctime
+    build_artifact = dist_path / adder_deb_name
     assert build_artifact.exists()
     artifact_creation_timestamp = build_artifact.stat().st_ctime
 
     CommandTester(app.find("install")).execute(f"src --dist-folder={dist_path.name} --no-overwrite")
 
-    assert header.exists()
-    header_no_overwrite_timestamp = header.stat().st_ctime
+    assert adder_header_location.exists()
+    header_no_overwrite_timestamp = adder_header_location.stat().st_ctime
     assert header_no_overwrite_timestamp == header_creation_timestamp
     assert build_artifact.exists()
     artifact_no_overwrite_timestamp = build_artifact.stat().st_ctime
     assert artifact_no_overwrite_timestamp == artifact_creation_timestamp
 
 
-def build_and_install_fails(app: Application, robenv_target_path: Path, run_mock: MagicMock, dist_path: Path) -> None:
+def build_and_install_fails(
+    app: Application,
+    run_mock: MagicMock,
+    dist_path: Path,
+    adder_header_location: Path,
+) -> None:
     run_mock.return_value = 1, "cool output"
     run_mock.side_effect = CommandFailedError(command="command", exit_status=1, output="cool output")
 
-    header = _get_adder_header_location(robenv_target_path)
-    assert header.exists()
-    header_creation_timestamp = header.stat().st_ctime
+    assert adder_header_location.exists()
+    header_creation_timestamp = adder_header_location.stat().st_ctime
     with pytest.raises(CommandFailedError):
         CommandTester(app.find("install")).execute(f"src --dist-folder={dist_path.name}")
 
-    assert header.exists()
-    header_recreate_timestamp = header.stat().st_ctime
+    assert adder_header_location.exists()
+    header_recreate_timestamp = adder_header_location.stat().st_ctime
     assert header_recreate_timestamp == header_creation_timestamp
 
 
 def build_and_install_can_fail(
     app: Application,
-    robenv_target_path: Path,
     run_mock: MagicMock,
     dist_path: Path,
+    adder_header_location: Path,
 ) -> None:
     run_mock.return_value = 1, "cool output"
     run_mock.side_effect = CommandFailedError(command="command", exit_status=1, output="cool output")
 
-    header = _get_adder_header_location(robenv_target_path)
-    assert header.exists()
-    header_creation_timestamp = header.stat().st_ctime
+    assert adder_header_location.exists()
+    header_creation_timestamp = adder_header_location.stat().st_ctime
     # The command would raise CommandFailedError, but with --can-fail we catch them and go on with the next package
     # For the error case see build_and_install_fails
     CommandTester(app.find("install")).execute(f"src --dist-folder={dist_path.name} --can-fail")
 
-    assert header.exists()
-    header_recreate_timestamp = header.stat().st_ctime
+    assert adder_header_location.exists()
+    header_recreate_timestamp = adder_header_location.stat().st_ctime
     assert header_recreate_timestamp == header_creation_timestamp
 
 
@@ -172,13 +183,24 @@ def build_and_install_can_fail(
 )
 def test_install_should_install_workspace(
     init_app: Application,
-    robenv_target_path: Path,
     run_mock: MagicMock,
     dist_path: Path,
     ros_workspace_path: Path,
+    robenv_target_path: Path,
+    adder_deb_name: str,
+    adder_lib_location: Path,
+    adder_header_location: Path,
 ) -> None:
-    build_and_install(init_app, robenv_target_path, ros_workspace_path, dist_path)
-    build_and_install_overwrite(init_app, robenv_target_path, dist_path)
-    build_and_install_no_overwrite(init_app, robenv_target_path, dist_path)
-    build_and_install_fails(init_app, robenv_target_path, run_mock, dist_path)
-    build_and_install_can_fail(init_app, robenv_target_path, run_mock, dist_path)
+    build_and_install(
+        init_app,
+        robenv_target_path,
+        ros_workspace_path,
+        dist_path,
+        adder_deb_name,
+        adder_lib_location,
+        adder_header_location,
+    )
+    build_and_install_overwrite(init_app, dist_path, adder_deb_name, adder_header_location)
+    build_and_install_no_overwrite(init_app, adder_deb_name, adder_header_location)
+    build_and_install_fails(init_app, run_mock, dist_path, adder_header_location)
+    build_and_install_can_fail(init_app, run_mock, dist_path, adder_header_location)
