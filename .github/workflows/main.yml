@@ -49,23 +49,28 @@ jobs:
               run: ./ci-lint.py --check
 
     unit_test:
+        runs-on: ubuntu-latest
         strategy:
-            fail-fast: true
+            fail-fast: false
             matrix:
-                os:
-                    - "ubuntu-latest"
-                    - "ubuntu-22.04"
-                python-version:
-                    - "3.8"
-                    - "3.10"
-                    - "3.11"
-        runs-on: ${{ matrix.os }}
+                container:
+                    - ros:noetic-ros-base
+                    - ros:iron-ros-base
+        container: ${{ matrix.container }}
         steps:
             - uses: actions/checkout@v3
+            - run: apt-get update
+            - run: |
+                apt-get --yes --no-install-recommends install \
+                curl \
+                fakeroot \
+                debhelper \
+                dh-python \
+                python-is-python3
 
             - uses: ./.github/actions/setup-poetry
               with:
-                  python-version: ${{ matrix.python-version }}
+                  python-version: "system"
             - uses: ./.github/actions/dependency-install
 
             - name: Unit Tests
