@@ -70,7 +70,7 @@ class IOFormatter(logging.Formatter):
         logging.ERROR: "error",
     }
 
-    def format(self, record: logging.LogRecord) -> str:  # noqa: A003
+    def format(self, record: logging.LogRecord) -> str:
         if not record.exc_info:
             level = record.levelno
             msg = record.msg

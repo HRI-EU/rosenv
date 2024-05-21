@@ -1,13 +1,7 @@
 ---
 name: CI
 
-on:
-    push:
-        branches:
-            - "main"
-    pull_request:
-        branches:
-            - "main"
+on: [push, pull_request]
 
 jobs:
     lock_file_check:
@@ -30,7 +24,7 @@ jobs:
             - uses: ./.github/actions/dependency-install
 
             - name: Formatting
-              run: ./ci-format.sh --check
+              run: ./ci-format.py --check
 
     typing:
         runs-on: ubuntu-latest
@@ -41,7 +35,7 @@ jobs:
             - uses: ./.github/actions/dependency-install
 
             - name: Typing
-              run: ./ci-typing.sh
+              run: ./ci-typing.py
 
     lint:
         runs-on: ubuntu-latest
@@ -52,7 +46,7 @@ jobs:
             - uses: ./.github/actions/dependency-install
 
             - name: Linting
-              run: ./ci-lint.sh
+              run: ./ci-lint.py --check
 
     unit_test:
         strategy:
@@ -75,7 +69,7 @@ jobs:
             - uses: ./.github/actions/dependency-install
 
             - name: Unit Tests
-              run: ./ci-unit-test.sh
+              run: ./ci-unit-test.py
 
     integration_test:
         runs-on: ubuntu-latest
@@ -103,7 +97,7 @@ jobs:
             - uses: ./.github/actions/dependency-install
 
             - name: Integration Tests
-              run: ./ci-integration-test.sh
+              run: ./ci-integration-test.py
 
     build:
         runs-on: ubuntu-latest
