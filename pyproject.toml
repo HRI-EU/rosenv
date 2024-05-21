@@ -12,7 +12,7 @@ rosenv = "rosenv.cli:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-bloom = "^0.11.2"
+bloom = "^0.12.0"
 cleo = "^2.0.1"
 shellingham = "^1.5.0.post1"
 pexpect = "^4.8.0"
@@ -25,6 +25,8 @@ setuptools = "45.2.0"
 
 importlib-resources = { version = "^5.12.0", python = "<3.9" }
 requests = "^2.31.0"
+
+rosdep = "^0.22.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.5"
@@ -63,6 +65,11 @@ show_error_codes = true
 show_error_code_links = true
 show_column_numbers = true
 pretty = true
+
+exclude = [
+    "^tests/resources/*$"
+]
+
 
 [[tool.mypy.overrides]]
 module = [

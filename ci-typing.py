@@ -40,7 +40,7 @@ import sys
 def main() -> None:
     try:
         subprocess.run(
-            ["poetry", "run", "mypy", "src", "tests/unit"],  # noqa: S603, S607
+            ["poetry", "run", "mypy", "src", "tests"],  # noqa: S603, S607
             check=True,
             stdout=sys.stdout,
             stderr=sys.stderr,
