@@ -46,11 +46,10 @@ from deb_pkg_tools.package import parse_filename
 from robenv.environment.env import DebName
 from robenv.environment.env import Installable
 from robenv.environment.env import RobEnv
-from rosenv.environment.env import UnmetDependencyError
 from robenv.environment.run_command import CommandAbortedError
 from robenv.environment.run_command import CommandFailedError
 from robenv.environment.run_command import run_command
-from rosenv.ros_package.package import PackageName
+from robenv.ros_package.package import PackageName
 from robenv.util.file_logger import write_log
 
 
@@ -129,7 +128,7 @@ class AddCommand(Command):
             url = self._get_apt_url(name_or_url)
         return self._download_deb_file(url)
 
-    def handle(self) -> int:  # noqa: C901, PLR0912
+    def handle(self) -> int:
         robenv = RobEnv()
 
         path_or_url_or_name: list[str] = self.argument("path_or_url_or_name")
@@ -139,28 +138,25 @@ class AddCommand(Command):
         candidates: list[Candidates] = []
 
         for pun in path_or_url_or_name:
-            try:
-                if "://" in pun:
-                    _logger.info("Installing from url: %s", pun)
-                    file_path = self._download(str(pun))
-                elif pun.endswith(".deb"):
-                    _logger.info("Installing from deb file path: %s", pun)
-                    file_path = Path(pun)
-                else:
-                    _logger.info("Installing from package name: %s", pun)
-                    file_path = self._download(str(pun))
+            if "://" in pun:
+                _logger.info("Installing from url: %s", pun)
+                file_path = self._download(str(pun))
+            elif pun.endswith(".deb"):
+                _logger.info("Installing from deb file path: %s", pun)
+                file_path = Path(pun)
+            else:
+                _logger.info("Installing from package name: %s", pun)
+                file_path = self._download(str(pun))
 
-                _logger.info("file_path: %s", file_path)
-                package_name = file_path.name.split("_")[0]
-                _logger.info("package_name: %s", package_name)
-                new_name = ""
-                if ask_for_name:
-                    new_name = input(
-                        f"Found name [{package_name}] for {file_path.name} Press enter to Accept or enter new Name:",
-                    )
-                candidates.append(Candidates(new_name if new_name else package_name, file_path))
-            except NoDownloadUrlError:  # noqa: PERF203
-                _logger.exception("Installing package failed. Arg: %s", path_or_url_or_name)
+            _logger.info("file_path: %s", file_path)
+            package_name = file_path.name.split("_")[0]
+            _logger.info("package_name: %s", package_name)
+            new_name = ""
+            if ask_for_name:
+                new_name = input(
+                    f"Found name [{package_name}] for {file_path.name} Press enter to Accept or enter new Name:",
+                )
+            candidates.append(Candidates(new_name if new_name else package_name, file_path))
 
         for candidate in candidates:
             if not candidate.path.exists():
@@ -180,8 +176,6 @@ class AddCommand(Command):
                 write_log(robenv.path, candidate.name, e.output)
                 _logger.exception("install %s failed", candidate.name)
                 return 1
-            except UnmetDependencyError:
-                _logger.exception("UnmetDependencyError for package %s", candidate.name)
             # for NOTUSED see https://github.com/python-poetry/cleo/issues/130
             self.call("rosdep add", f"NOTUSED {candidate.name} {parse_filename(candidate.path.name).name}")
         return 0
