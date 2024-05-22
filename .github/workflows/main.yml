@@ -91,9 +91,9 @@ jobs:
             - run: |
                 apt-get --yes --no-install-recommends install \
                 curl \
-                fakeroot \
                 debhelper \
                 dh-python \
+                fakeroot \
                 python-is-python3
 
             - uses: ./.github/actions/setup-poetry
