@@ -55,9 +55,16 @@ def _copy_meta_example_project(robenv_target_path: Path, example_project: Path) 
     target_folder.mkdir(exist_ok=True, parents=True)
 
     adder_meta_project = example_project / "src/adder_meta"
+    adder_project = example_project / "src/adder"
+    adder_srvs_project = example_project / "src/adder_srvs"
 
-    assert adder_meta_project.exists(), "Adder Meta project doesn't exist, cannot copy meta example"
-    shutil.copytree(adder_meta_project, target_folder / "adder_meta")
+    assert adder_meta_project.exists(), "adder_meta project doesn't exist, cannot copy meta example"
+    assert adder_project.exists(), "adder project doesn't exist, cannot copy meta example"
+    assert adder_srvs_project.exists(), "adder_srvs project doesn't exist, cannot copy meta example"
+
+    shutil.copytree(adder_meta_project, target_folder / adder_meta_project.name)
+    shutil.copytree(adder_project, target_folder / adder_project.name)
+    shutil.copytree(adder_srvs_project, target_folder / adder_srvs_project.name)
 
     yield
 
@@ -77,12 +84,23 @@ def test_install_meta_package_should_not_contain_overwritten_files(
     distro_settings: DistroConfig,
     dist_path: Path,
 ) -> None:
+    # ATTENTION:
+    # this test accesses the internet via `rosdep init` and `rosdep update`
+    # necessary because our cached rosdep files now are mostly created on ROS2
+    # variants and code the ros distro within them, this test expects correct
+    # resolve to the currently used distro which mostly is `noetic`
+
+    # adder, adder_srvs, adder_meta
+    expected_built_files = 3
+
     dist_path.rmdir()
     assert not dist_path.exists()
     CommandTester(init_app.find("install")).execute("src")
-    assert len(list(dist_path.iterdir())) == 1
+    assert len(list(dist_path.iterdir())) == expected_built_files
 
-    contents: dict[str, ArchiveEntry] = inspect_package_contents(next(dist_path.iterdir()))
+    contents: dict[str, ArchiveEntry] = inspect_package_contents(
+        next(filter(lambda x: "meta" in x.name, dist_path.iterdir())),
+    )
 
     assert "/opt/ros/noetic/share/adder_meta/package.xml" in contents
 

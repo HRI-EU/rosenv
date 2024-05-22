@@ -35,9 +35,6 @@ import os
 import shutil
 
 from pathlib import Path
-from typing import Any
-from unittest.mock import MagicMock
-from unittest.mock import patch
 
 import pytest
 
@@ -46,20 +43,7 @@ from cleo.commands.command import Command
 from cleo.testers.command_tester import CommandTester
 
 from robenv.cli import commands
-from robenv.environment.run_command import CommandOutput
-from robenv.environment.shell import RobEnvShell
 from tests.conftest import YieldFixture
-
-
-@pytest.fixture(autouse=True)
-def _rosdistro_index(rosdistro_index: Path) -> YieldFixture[None]:
-    assert rosdistro_index.exists(), f"Rosdistro index doesn't exist at: {rosdistro_index!s}"
-
-    os.environ["ROSDISTRO_INDEX_URL"] = rosdistro_index.as_uri()
-
-    yield
-
-    del os.environ["ROSDISTRO_INDEX_URL"]
 
 
 @pytest.fixture(autouse=True)
@@ -114,45 +98,6 @@ def dist_path(tmp_path: Path) -> Path:
     dist_path = tmp_path / "dist"
     dist_path.mkdir(exist_ok=True)
     return dist_path
-
-
-def noop(*args: Any) -> CommandOutput:  # noqa: ANN401
-    return f"mocked run: {args}"
-
-
-@pytest.fixture(autouse=True)
-def run_mock(resources: Path, robenv_target_path: Path) -> YieldFixture[MagicMock]:
-    rosdep_mocks = resources / "rosdep_mocks"
-    rosdep_target = robenv_target_path / "cache" / "ros" / "rosdep"
-
-    def mocked_update(*args: Any) -> CommandOutput:  # noqa: ANN401
-        shutil.copytree(rosdep_mocks, rosdep_target)
-        return f"mocked run: {args}"
-
-    mocked_commands = {
-        "rosdep init": noop,
-        "rosdep update": mocked_update,
-    }
-
-    cached_run = RobEnvShell.run
-
-    def complex_run(
-        self: RobEnvShell,
-        command: str,
-        cwd: Path | None = None,
-        events: dict[str, str] | None = None,
-    ) -> CommandOutput:
-        return mocked_commands.get(command, cached_run)(
-            self,
-            command,
-            cwd,
-            events,
-        )
-
-    with patch.object(RobEnvShell, "run", autospec=True) as runner:
-        runner.side_effect = complex_run
-
-        yield runner
 
 
 @pytest.fixture()
