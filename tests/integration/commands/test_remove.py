@@ -51,7 +51,7 @@ def test_remove_package(
     ros_distro: RosDistribution,
     nodeps: Path,
 ) -> None:
-    CommandTester(init_app.find("add")).execute(f"nodeps {nodeps}")
+    CommandTester(init_app.find("add")).execute(f"{nodeps}")
 
     assert_is_installed(robenv_target_path, nodeps.name, ros_distro)
 
@@ -79,9 +79,9 @@ def test_remove_package_with_dependents(
     nodeps: Path,
     dep_on_nodeps: Path,
 ) -> None:
-    CommandTester(init_app.find("add")).execute(f"nodeps {nodeps!s}")
+    CommandTester(init_app.find("add")).execute(f"{nodeps!s}")
     assert_is_installed(robenv_target_path, nodeps.name, ros_distro)
-    CommandTester(init_app.find("add")).execute(f"dep-on-nodeps {dep_on_nodeps!s}")
+    CommandTester(init_app.find("add")).execute(f"{dep_on_nodeps!s}")
     assert_is_installed(robenv_target_path, dep_on_nodeps.name, ros_distro)
 
     with pytest.raises(RemoveDependencyError):

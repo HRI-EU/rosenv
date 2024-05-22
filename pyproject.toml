@@ -79,6 +79,8 @@ module = [
     "defusedxml",
     "deb_pkg_tools.*",
     "importlib_resources.*",
+    "yaml",
+    "requests"
 ]
 ignore_missing_imports = true
 
