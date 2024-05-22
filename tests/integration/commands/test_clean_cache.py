@@ -45,13 +45,13 @@ from tests.integration.commands import create_cache_files_in_adder_project
 
 @pytest.mark.usefixtures("_copy_minimal_example_project")
 def test_clean_cache(
-    init_app: Application,
+    app: Application,
     ros_workspace_path: Path,
 ) -> None:
     create_cache_files_in_adder_project(ros_workspace_path)
 
     assert_adder_build_cache_files_exist(ros_workspace_path)
 
-    CommandTester(init_app.find("clear-cache")).execute("src")
+    CommandTester(app.find("clear-cache")).execute("src")
 
     assert_adder_build_cache_files_not_exist(ros_workspace_path)
