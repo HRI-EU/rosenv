@@ -39,9 +39,9 @@ import pytest
 from cleo.application import Application
 from cleo.testers.command_tester import CommandTester
 
-from rosenv.environment.run_command import CommandFailedError
-from rosenv.environment.run_command import CommandOutput
-from rosenv.environment.shell import RosEnvShell
+from robenv.environment.run_command import CommandFailedError
+from robenv.environment.run_command import CommandOutput
+from robenv.environment.shell import RobEnvShell
 
 
 @pytest.mark.usefixtures("_copy_full_example_project")
@@ -54,7 +54,7 @@ def test_rosdep_verify_should_exit_with_non_zero_code(init_app: Application, run
     orig_side_effect = run_mock.side_effect
 
     def additional_effect(
-        self: RosEnvShell,
+        self: RobEnvShell,
         command: str,
         cwd: Path,
         events: dict[str, str] | None = None,

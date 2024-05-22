@@ -1,6 +1,6 @@
 ---
-name: "Setup system for rosenv"
-description: "Installs system dependencies necessary to run rosenv"
+name: "Setup system for robenv"
+description: "Installs system dependencies necessary to run robenv"
 runs:
     using: composite
     steps:

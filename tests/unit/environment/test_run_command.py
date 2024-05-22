@@ -33,9 +33,9 @@ from __future__ import annotations
 
 import pytest
 
-from rosenv.environment.run_command import CommandAbortedError
-from rosenv.environment.run_command import CommandFailedError
-from rosenv.environment.run_command import run_command
+from robenv.environment.run_command import CommandAbortedError
+from robenv.environment.run_command import CommandFailedError
+from robenv.environment.run_command import run_command
 
 
 def test_returns_result() -> None:

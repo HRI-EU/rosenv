@@ -25,5 +25,7 @@ venv
 
 *.pyc
 
-rosenv
-!src/rosenv
+robenv
+!src/robenv
+!tests/resources/locate_robenv_tree/robenv
+

@@ -42,17 +42,17 @@ from cleo.application import Application
 from cleo.testers.command_tester import CommandTester
 
 
-def test_initialize_should_initialize_a_correct_rosenv(app: Application, rosenv_target_path: Path) -> None:
+def test_initialize_should_initialize_a_correct_robenv(app: Application, robenv_target_path: Path) -> None:
     command_tester = CommandTester(app.find("init"))
     command_tester.execute()
 
-    assert rosenv_target_path.is_dir()
-    assert (rosenv_target_path / "activate").is_file()
-    assert (rosenv_target_path / "rosdep.yaml").is_file()
+    assert robenv_target_path.is_dir()
+    assert (robenv_target_path / "activate").is_file()
+    assert (robenv_target_path / "rosdep.yaml").is_file()
 
-    rosdep_sources = rosenv_target_path / "etc/ros/rosdep/sources.list.d"
+    rosdep_sources = robenv_target_path / "etc/ros/rosdep/sources.list.d"
     assert rosdep_sources.is_dir()
-    assert (rosdep_sources / "50-rosenv.list").is_file()
+    assert (rosdep_sources / "50-robenv.list").is_file()
 
 
 def test_initialize_should_initialize_rosdep(
@@ -75,7 +75,7 @@ def test_initialize_should_initialize_rosdep(
 
 def test_rosdep_content_from_example(
     app: Application,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
     example_project: Path,
     project_list: list[str],
 ) -> None:
@@ -83,19 +83,19 @@ def test_rosdep_content_from_example(
     command_tester = CommandTester(command)
     command_tester.execute(f"--workspace-path {example_project!s}")
 
-    assert (rosenv_target_path / "rosdep.yaml").is_file()
+    assert (robenv_target_path / "rosdep.yaml").is_file()
 
-    rosdep_content: dict[str, dict[str, list[str]]] = yaml.safe_load((rosenv_target_path / "rosdep.yaml").read_text())
+    rosdep_content: dict[str, dict[str, list[str]]] = yaml.safe_load((robenv_target_path / "rosdep.yaml").read_text())
     result_keys = list(rosdep_content.keys())
     assert result_keys == project_list
 
 
 def test_rosdep_set_file(
     app: Application,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
 ) -> None:
     location = "some_random_location"
-    rosdep_file_path = rosenv_target_path.parent / location / "rosdep.yaml"
+    rosdep_file_path = robenv_target_path.parent / location / "rosdep.yaml"
 
     rosdep_file_path.parent.mkdir(exist_ok=True, parents=True)
     rosdep_file_path.write_text(
@@ -111,9 +111,9 @@ adder:
     command_tester = CommandTester(command)
     command_tester.execute(f"--rosdep-path {rosdep_file_path!s}")
 
-    # check for correct location entry of rosdep in 50-rosenv.list
-    rosdep_sources = rosenv_target_path / "etc/ros/rosdep/sources.list.d"
-    rosdep_sources_list = rosdep_sources / "50-rosenv.list"
+    # check for correct location entry of rosdep in 50-robenv.list
+    rosdep_sources = robenv_target_path / "etc/ros/rosdep/sources.list.d"
+    rosdep_sources_list = rosdep_sources / "50-robenv.list"
 
     assert rosdep_sources.is_dir()
     assert rosdep_sources_list.is_file()

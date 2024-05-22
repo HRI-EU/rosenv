@@ -35,38 +35,31 @@ from pathlib import Path
 
 import pytest
 
-from rosenv.catkin_profile.profile import CatkinProfile
-from rosenv.environment.distro import RosDistribution
-from rosenv.ros_package.workspace import ROSWorkspace
-from rosenv.rosdep.rosdep import ResolvedPackageName
-from rosenv.rosdep.rosdep import Rosdep
-from rosenv.rosdep.rosdep import RosDepDict
-from rosenv.rosdep.rosdep import SystemName
-from tests.conftest import ROS_1
-from tests.conftest import get_ros_version
+from robenv.catkin_profile.profile import CatkinProfile
+from robenv.environment.distro import RosDistribution
+from robenv.ros_package.workspace import ROSWorkspace
+from robenv.rosdep.rosdep import ResolvedPackageName
+from robenv.rosdep.rosdep import Rosdep
+from robenv.rosdep.rosdep import RosDepDict
+from robenv.rosdep.rosdep import SystemName
 
 
 @pytest.fixture()
-def expected_rosdep() -> RosDepDict:
+def expected_rosdep(ros_distro: RosDistribution) -> RosDepDict:
     ubuntu = SystemName("ubuntu")
 
-    if get_ros_version() == ROS_1:
-        return {
-            "adder": {ubuntu: [ResolvedPackageName("ros-noetic-adder")]},
-            "adder_meta": {ubuntu: [ResolvedPackageName("ros-noetic-adder-meta")]},
-            "adder_srvs": {ubuntu: [ResolvedPackageName("ros-noetic-adder-srvs")]},
-            "client": {ubuntu: [ResolvedPackageName("ros-noetic-client")]},
-            "python_server": {ubuntu: [ResolvedPackageName("ros-noetic-python-server")]},
-            "server": {ubuntu: [ResolvedPackageName("ros-noetic-server")]},
-        }
-
-    return {
-        "adder": {ubuntu: [ResolvedPackageName("ros-iron-adder")]},
-        "adder_srvs": {ubuntu: [ResolvedPackageName("ros-iron-adder-srvs")]},
-        "client": {ubuntu: [ResolvedPackageName("ros-iron-client")]},
-        "python_server": {ubuntu: [ResolvedPackageName("ros-iron-python-server")]},
-        "server": {ubuntu: [ResolvedPackageName("ros-iron-server")]},
+    result: RosDepDict = {
+        "adder": {ubuntu: [ResolvedPackageName(f"ros-{ros_distro}-adder")]},
+        "adder_srvs": {ubuntu: [ResolvedPackageName(f"ros-{ros_distro}-adder-srvs")]},
+        "client": {ubuntu: [ResolvedPackageName(f"ros-{ros_distro}-client")]},
+        "python_server": {ubuntu: [ResolvedPackageName(f"ros-{ros_distro}-python-server")]},
+        "server": {ubuntu: [ResolvedPackageName(f"ros-{ros_distro}-server")]},
     }
+
+    if ros_distro == "noetic":
+        result["adder_meta"] = {ubuntu: [ResolvedPackageName("ros-noetic-adder-meta")]}
+
+    return result
 
 
 def test_generate_should_give_dict_to_workspace(

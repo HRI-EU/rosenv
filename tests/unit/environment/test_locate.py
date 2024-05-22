@@ -36,14 +36,14 @@ from pathlib import Path
 
 import pytest
 
-from rosenv.environment.env import DEFAULT_ROSENV_NAME
-from rosenv.environment.locate import RosEnvNotFoundError
-from rosenv.environment.locate import locate
+from robenv.environment.env import DEFAULT_ROBENV_NAME
+from robenv.environment.locate import RobEnvNotFoundError
+from robenv.environment.locate import locate
 
 
 @pytest.fixture()
 def candidate_dir(resources: Path) -> Path:
-    candidate_dir = resources / "locate_rosenv_tree"
+    candidate_dir = resources / "locate_robenv_tree"
     assert candidate_dir.exists()
     return candidate_dir
 
@@ -62,39 +62,39 @@ def test_stops_at_git_root(candidate_dir: Path) -> None:
     cwd = candidate_dir / "with_git/dir"
     assert cwd.exists()
 
-    with pytest.raises(RosEnvNotFoundError):
-        locate(DEFAULT_ROSENV_NAME, path=cwd)
+    with pytest.raises(RobEnvNotFoundError):
+        locate(DEFAULT_ROBENV_NAME, path=cwd)
 
 
 def test_stops_at_pyproject_toml(candidate_dir: Path) -> None:
     cwd = candidate_dir / "with_pyproject_toml/dir"
     assert cwd.exists()
 
-    with pytest.raises(RosEnvNotFoundError):
-        locate(DEFAULT_ROSENV_NAME, path=cwd)
+    with pytest.raises(RobEnvNotFoundError):
+        locate(DEFAULT_ROBENV_NAME, path=cwd)
 
 
 def test_stops_at_root_dir() -> None:
     cwd = Path("/foo")
 
-    with pytest.raises(RosEnvNotFoundError):
-        locate(DEFAULT_ROSENV_NAME, path=cwd)
+    with pytest.raises(RobEnvNotFoundError):
+        locate(DEFAULT_ROBENV_NAME, path=cwd)
 
 
-def test_finds_rosenv(candidate_dir: Path) -> None:
+def test_finds_robenv(candidate_dir: Path) -> None:
     cwd = candidate_dir / "with_git_submodule/dir"
     assert cwd.exists()
 
-    rosenv_path = locate(DEFAULT_ROSENV_NAME, path=cwd)
+    robenv_path = locate(DEFAULT_ROBENV_NAME, path=cwd)
 
-    assert rosenv_path == candidate_dir / "rosenv"
+    assert robenv_path == candidate_dir / "robenv"
 
 
 def test_does_not_stop_at_git_submodule(candidate_dir: Path) -> None:
     cwd = candidate_dir / "with_git_submodule/dir"
     assert cwd.exists()
 
-    rosenv_path = locate(DEFAULT_ROSENV_NAME, path=cwd)
+    robenv_path = locate(DEFAULT_ROBENV_NAME, path=cwd)
 
-    assert rosenv_path is not None
-    assert not (rosenv_path / ".git").is_file()
+    assert robenv_path is not None
+    assert not (robenv_path / ".git").is_file()

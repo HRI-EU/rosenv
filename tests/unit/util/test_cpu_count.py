@@ -37,12 +37,12 @@ import pytest
 
 from pytest_mock import MockFixture
 
-from rosenv.util.cpu_count import get_cpu_count
+from robenv.util.cpu_count import get_cpu_count
 
 
 @pytest.fixture()
 def cpu_count_mock(mocker: MockFixture) -> MagicMock:
-    return mocker.patch("rosenv.util.cpu_count.cpu_count")
+    return mocker.patch("robenv.util.cpu_count.cpu_count")
 
 
 def test_cpu_count_should_give_cpu_count_from_os(cpu_count_mock: MagicMock) -> None:

@@ -35,9 +35,9 @@ from unittest.mock import patch
 
 import pytest
 
-from rosenv.environment.distro import DistroConfig
-from rosenv.environment.distro import RosDistribution
-from rosenv.rosdep.rosdep import Rosdep
+from robenv.environment.distro import DistroConfig
+from robenv.environment.distro import RosDistribution
+from robenv.rosdep.rosdep import Rosdep
 from tests.conftest import YieldFixture
 
 

@@ -39,13 +39,13 @@ from cleo.testers.command_tester import CommandTester
 
 def test_run_should_call_command_in_env(
     init_app: Application,
-    rosenv_target_path: Path,
+    robenv_target_path: Path,
 ) -> None:
-    target_file = rosenv_target_path / "test_run_output"
+    target_file = robenv_target_path / "test_run_output"
     assert not target_file.exists()
-    CommandTester(init_app.find("run")).execute(f"echo $ROSENV_ENV > {target_file!s}")
+    CommandTester(init_app.find("run")).execute(f"echo $ROBENV_ENV > {target_file!s}")
     assert target_file.exists()
-    assert target_file.read_text().strip() == str(rosenv_target_path)
+    assert target_file.read_text().strip() == str(robenv_target_path)
 
 
 def test_run_should_return_exitcode(

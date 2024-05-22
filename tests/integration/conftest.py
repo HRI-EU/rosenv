@@ -35,9 +35,6 @@ import os
 import shutil
 
 from pathlib import Path
-from typing import Any
-from unittest.mock import MagicMock
-from unittest.mock import patch
 
 import pytest
 
@@ -45,29 +42,16 @@ from cleo.application import Application
 from cleo.commands.command import Command
 from cleo.testers.command_tester import CommandTester
 
-from rosenv.cli import commands
-from rosenv.environment.run_command import CommandOutput
-from rosenv.environment.shell import RosEnvShell
+from robenv.cli import commands
 from tests.conftest import YieldFixture
 
 
 @pytest.fixture(autouse=True)
-def _rosdistro_index(rosdistro_index: Path) -> YieldFixture[None]:
-    assert rosdistro_index.exists(), f"Rosdistro index doesn't exist at: {rosdistro_index!s}"
-
-    os.environ["ROSDISTRO_INDEX_URL"] = rosdistro_index.as_uri()
-
-    yield
-
-    del os.environ["ROSDISTRO_INDEX_URL"]
-
-
-@pytest.fixture(autouse=True)
-def change_cwd(rosenv_target_path: Path) -> YieldFixture[Path]:
+def change_cwd(robenv_target_path: Path) -> YieldFixture[Path]:
     original_cwd = Path.cwd()
-    os.chdir(rosenv_target_path.parent)
+    os.chdir(robenv_target_path.parent)
 
-    yield rosenv_target_path.parent
+    yield robenv_target_path.parent
 
     os.chdir(original_cwd)
 
@@ -95,10 +79,10 @@ def init_app(
 
 
 @pytest.fixture()
-def rosenv_target_path(tmp_path: Path) -> Path:
-    rosenv_target = tmp_path / "rosenv"
-    assert not rosenv_target.exists()
-    return rosenv_target
+def robenv_target_path(tmp_path: Path) -> Path:
+    robenv_target = tmp_path / "robenv"
+    assert not robenv_target.exists()
+    return robenv_target
 
 
 @pytest.fixture()
@@ -116,48 +100,9 @@ def dist_path(tmp_path: Path) -> Path:
     return dist_path
 
 
-def noop(*args: Any) -> CommandOutput:  # noqa: ANN401
-    return f"mocked run: {args}"
-
-
-@pytest.fixture(autouse=True)
-def run_mock(resources: Path, rosenv_target_path: Path) -> YieldFixture[MagicMock]:
-    rosdep_mocks = resources / "rosdep_mocks"
-    rosdep_target = rosenv_target_path / "cache" / "ros" / "rosdep"
-
-    def mocked_update(*args: Any) -> CommandOutput:  # noqa: ANN401
-        shutil.copytree(rosdep_mocks, rosdep_target)
-        return f"mocked run: {args}"
-
-    mocked_commands = {
-        "rosdep init": noop,
-        "rosdep update": mocked_update,
-    }
-
-    cached_run = RosEnvShell.run
-
-    def complex_run(
-        self: RosEnvShell,
-        command: str,
-        cwd: Path | None = None,
-        events: dict[str, str] | None = None,
-    ) -> CommandOutput:
-        return mocked_commands.get(command, cached_run)(
-            self,
-            command,
-            cwd,
-            events,
-        )
-
-    with patch.object(RosEnvShell, "run", autospec=True) as runner:
-        runner.side_effect = complex_run
-
-        yield runner
-
-
 @pytest.fixture()
-def _copy_minimal_example_project(rosenv_target_path: Path, example_project: Path) -> YieldFixture[None]:
-    target_folder = rosenv_target_path.parent / "src"
+def _copy_minimal_example_project(robenv_target_path: Path, example_project: Path) -> YieldFixture[None]:
+    target_folder = robenv_target_path.parent / "src"
     target_folder.mkdir(exist_ok=True, parents=True)
 
     adder_project = example_project / "src" / "adder"
@@ -173,10 +118,10 @@ def _copy_minimal_example_project(rosenv_target_path: Path, example_project: Pat
 
 
 @pytest.fixture()
-def _copy_full_example_project(rosenv_target_path: Path, example_project: Path) -> YieldFixture[None]:
-    target_folder = rosenv_target_path.parent / "src"
+def _copy_full_example_project(robenv_target_path: Path, example_project: Path) -> YieldFixture[None]:
+    target_folder = robenv_target_path.parent / "src"
 
-    # copy only "src" so we filter out probably unwanted things (like rosenv, etc)
+    # copy only "src" so we filter out probably unwanted things (like robenv, etc)
     entire_example_project = example_project / "src"
 
     assert entire_example_project.exists(), "Adder project doesn't exist, cannot copy minimal example"

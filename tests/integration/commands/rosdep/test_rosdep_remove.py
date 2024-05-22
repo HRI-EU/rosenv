@@ -41,7 +41,7 @@ from cleo.application import Application
 from cleo.testers.command_tester import CommandTester
 
 
-def test_rosdep_remove_should_find_rosenv_rosdep_yaml(
+def test_rosdep_remove_should_find_robenv_rosdep_yaml(
     app: Application,
     rosdep_yaml: Path,
     translated_adder: str,

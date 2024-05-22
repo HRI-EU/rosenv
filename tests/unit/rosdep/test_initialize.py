@@ -33,8 +33,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from rosenv.environment.distro import RosDistribution
-from rosenv.rosdep.initialize import initialize_rosdep
+from robenv.environment.distro import RosDistribution
+from robenv.rosdep.initialize import initialize_rosdep
 
 
 def test_initialize(example_project: Path, ros_distro: RosDistribution, tmp_path: Path) -> None:
@@ -42,7 +42,7 @@ def test_initialize(example_project: Path, ros_distro: RosDistribution, tmp_path
 
     rosdep_yaml = tmp_path.joinpath("rosdep.yaml")
     assert rosdep_yaml.is_file()
-    sources_list = tmp_path / "etc/ros/rosdep/sources.list.d/50-rosenv.list"
+    sources_list = tmp_path / "etc/ros/rosdep/sources.list.d/50-robenv.list"
     assert sources_list.is_file()
     with sources_list.open() as file:
         assert file.readline() == f"yaml file://{rosdep_yaml}"

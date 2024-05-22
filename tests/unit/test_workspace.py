@@ -35,9 +35,9 @@ from pathlib import Path
 
 import pytest
 
-from rosenv.catkin_profile import CatkinProfile
-from rosenv.ros_package.package import PackageName
-from rosenv.ros_package.workspace import ROSWorkspace
+from robenv.catkin_profile import CatkinProfile
+from robenv.ros_package.package import PackageName
+from robenv.ros_package.workspace import ROSWorkspace
 from tests.conftest import ROS_1_PROJECT_LIST
 from tests.conftest import ROS_2_PROJECT_LIST
 

@@ -36,7 +36,7 @@ import signal
 
 import pytest
 
-from rosenv.util.cancelable_executor import CancelableExecutor
+from robenv.util.cancelable_executor import CancelableExecutor
 from tests.conftest import YieldFixture
 
 

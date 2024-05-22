@@ -31,15 +31,21 @@
 #
 from __future__ import annotations
 
+import os
 import shutil
 
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 
 from pytest_mock import MockerFixture
 
+from robenv.environment.run_command import CommandOutput
+from robenv.environment.shell import RobEnvShell
+from tests.conftest import YieldFixture
 from tests.integration.commands import package_name
 
 
@@ -87,9 +93,59 @@ def dep_on_nodeps(test_debs: Path) -> Path:
 
 @pytest.fixture(autouse=True)
 def requests_mock(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("rosenv.commands.add.requests")
+    return mocker.patch("robenv.commands.add.requests")
 
 
 @pytest.fixture(autouse=True)
 def run_command_mock(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("rosenv.commands.add.run_command")
+    return mocker.patch("robenv.commands.add.run_command")
+
+
+def noop(*args: Any) -> CommandOutput:  # noqa: ANN401
+    return f"mocked run: {args}"
+
+
+@pytest.fixture(autouse=True)
+def run_mock(resources: Path, robenv_target_path: Path) -> YieldFixture[MagicMock]:
+    rosdep_mocks = resources / "rosdep_mocks"
+    rosdep_target = robenv_target_path / "cache" / "ros" / "rosdep"
+
+    def mocked_update(*args: Any) -> CommandOutput:  # noqa: ANN401
+        shutil.copytree(rosdep_mocks, rosdep_target)
+        return f"mocked run: {args}"
+
+    mocked_commands = {
+        "rosdep init": noop,
+        "rosdep update": mocked_update,
+    }
+
+    cached_run = RobEnvShell.run
+
+    def complex_run(
+        self: RobEnvShell,
+        command: str,
+        cwd: Path | None = None,
+        events: dict[str, str] | None = None,
+    ) -> CommandOutput:
+        return mocked_commands.get(command, cached_run)(
+            self,
+            command,
+            cwd,
+            events,
+        )
+
+    with patch.object(RobEnvShell, "run", autospec=True) as runner:
+        runner.side_effect = complex_run
+
+        yield runner
+
+
+@pytest.fixture(autouse=True)
+def _rosdistro_index(rosdistro_index: Path) -> YieldFixture[None]:
+    assert rosdistro_index.exists(), f"Rosdistro index doesn't exist at: {rosdistro_index!s}"
+
+    os.environ["ROSDISTRO_INDEX_URL"] = rosdistro_index.as_uri()
+
+    yield
+
+    del os.environ["ROSDISTRO_INDEX_URL"]

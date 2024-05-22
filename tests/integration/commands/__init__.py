@@ -33,7 +33,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from rosenv.environment.distro import RosDistribution
+from robenv.environment.distro import RosDistribution
 
 
 class MockResponse:
@@ -45,20 +45,20 @@ def package_name() -> str:
     return "adder"
 
 
-def _get_rosenv_paths(rosenv_target_path: Path, ros_distro: RosDistribution) -> tuple[Path, Path, Path]:
-    packages_folder = rosenv_target_path / "rosenv/packages"
-    header = rosenv_target_path / f"opt/ros/{ros_distro}/include/{package_name()}/{package_name()}.h"
-    lib = rosenv_target_path / f"opt/ros/{ros_distro}/lib/lib{package_name()}.so"
+def _get_robenv_paths(robenv_target_path: Path, ros_distro: RosDistribution) -> tuple[Path, Path, Path]:
+    packages_folder = robenv_target_path / "robenv/packages"
+    header = robenv_target_path / f"opt/ros/{ros_distro}/include/{package_name()}/{package_name()}.h"
+    lib = robenv_target_path / f"opt/ros/{ros_distro}/lib/lib{package_name()}.so"
     return header, lib, packages_folder
 
 
-def assert_is_not_installed(rosenv_target_path: Path, deb_name: str, ros_distro: RosDistribution) -> None:
-    _, _, packages_folder = _get_rosenv_paths(rosenv_target_path, ros_distro)
+def assert_is_not_installed(robenv_target_path: Path, deb_name: str, ros_distro: RosDistribution) -> None:
+    _, _, packages_folder = _get_robenv_paths(robenv_target_path, ros_distro)
     assert not (packages_folder / deb_name).exists()
 
 
-def assert_is_installed(rosenv_target_path: Path, deb_name: str, ros_distro: RosDistribution) -> None:
-    _, _, packages_folder = _get_rosenv_paths(rosenv_target_path, ros_distro)
+def assert_is_installed(robenv_target_path: Path, deb_name: str, ros_distro: RosDistribution) -> None:
+    _, _, packages_folder = _get_robenv_paths(robenv_target_path, ros_distro)
     assert (packages_folder / deb_name).exists()
 
 
