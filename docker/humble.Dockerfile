@@ -21,7 +21,7 @@ RUN \
         python3-pip \
         sudo && \
     rm -rf /var/lib/apt/lists/* && \
-    pip3 install --no-cache-dir poetry==1.5.1
+    pip3 install --no-cache-dir poetry==1.8.3
 
 RUN echo "hri ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/hri
 
