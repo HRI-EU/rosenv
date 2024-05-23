@@ -92,6 +92,11 @@ def nodeps2(test_debs: Path) -> Path:
 
 
 @pytest.fixture()
+def nodeps_clone(test_debs: Path) -> Path:
+    return test_debs / "nodeps-clone_0.0.0_all.deb"
+
+
+@pytest.fixture()
 def dep_on_nodeps(test_debs: Path) -> Path:
     return test_debs / "dep-on-nodeps_0.0.0_all.deb"
 
