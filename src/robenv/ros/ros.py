@@ -8,9 +8,9 @@ from shutil import copy
 
 import requests
 
-from rosenv.environment.distro import RosDistribution
-from rosenv.environment.distro import parse_distro
-from rosenv.environment.run_command import run_command
+from robenv.environment.distro import RosDistribution
+from robenv.environment.distro import parse_distro
+from robenv.environment.run_command import run_command
 
 
 _logger = getLogger(__name__)
@@ -23,15 +23,16 @@ class ROS:
     _archive_path: Path
 
     def __init__(self, path: str) -> None:
-        cache_path = Path.home() / ".cache/rosenv"
+        cache_path = Path.home() / ".cache/robenv"
         xdg_home = os.environ.get("XDG_CACHE_HOME")
         if xdg_home is not None:
-            cache_path = Path(xdg_home) / "rosenv"
+            cache_path = Path(xdg_home) / "robenv"
 
         if path.startswith("http") or path.endswith("tar.gz"):
             if "ros2" not in path:
+                msg = "possible no ros2 archive, get a possible link/file from https://github.com/ros2/ros2/releases"
                 raise ValueError(
-                    "possible no ros2 archive, get a possible link/file from https://github.com/ros2/ros2/releases"
+                    msg,
                 )
             file_name = path.split("/")[-1]
             # file_name is somthing like: ros2-humble-20231122-linux-jammy-amd64.tar.bz2
@@ -50,7 +51,7 @@ class ROS:
             self.path = self._find_path()
         else:
             _logger.info(" %s ", path)
-            self.distro = parse_distro(path.split('/')[3])
+            self.distro = parse_distro(path.split("/")[3])
             self.path = Path(path)
 
     def _find_path(self) -> Path:

@@ -31,7 +31,6 @@
 #
 from __future__ import annotations
 
-import os
 from contextlib import suppress
 from dataclasses import dataclass
 from logging import getLogger
@@ -140,6 +139,8 @@ def _create_new_files(config: RobEnvInitConfig) -> None:
     if "local_setup.sh" not in distro_config.files_to_copy:
         (ros_dir / "local_setup.sh").write_text(get_local_setup_contents(config.robenv_ros_path))
 
+    if (ros_dir / "setup.sh").exists():
+        (ros_dir / "setup.sh").rename(ros_dir / "distro_setup.sh")
     (ros_dir / "setup.sh").write_text(
         get_setup_contents(
             config.robenv_ros_path,

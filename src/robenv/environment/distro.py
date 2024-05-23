@@ -60,6 +60,7 @@ ROS1_DEFAULT_CONFIG = DistroConfig(
         "local_setup.zsh",
         "setup.bash",
         "setup.zsh",
+        "setup.sh",
     ),
     files_to_link=(
         ".catkin",
@@ -82,7 +83,6 @@ ROS1_DEFAULT_CONFIG = DistroConfig(
         "local_setup.sh",
         "local_setup.zsh",
         "setup.bash",
-        "setup.sh",
         "setup.zsh",
     ),
     rename_strategy=_default_rename_strategy,
@@ -117,7 +117,6 @@ ROS2_DEFAULT_CONFIG = DistroConfig(
         "local_setup.sh",
         "local_setup.zsh",
         "setup.bash",
-        "setup.sh",
         "setup.zsh",
     ),
     rename_strategy=_default_rename_strategy,

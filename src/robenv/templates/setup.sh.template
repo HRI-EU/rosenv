@@ -2,5 +2,5 @@
 
 export ROS_DISTRO=$distribution
 : $${$variable_name:=$ros_folder}
-. $ros_folder/$distribution/setup.sh
+. $ros_folder/distro_setup.sh
 . $activate_file

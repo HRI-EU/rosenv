@@ -39,9 +39,9 @@ from cleo.helpers import option
 
 from robenv.commands.util import NoRosInstallationDetectedError
 from robenv.commands.util import get_default_ros_path
-from rosenv.commands.util import verify_existing_paths
-from rosenv.environment.initialize import initialize
-from robenv.rob.rob import ROS
+from robenv.commands.util import verify_existing_paths
+from robenv.environment.initialize import initialize
+from robenv.ros.ros import ROS
 
 
 _logger = getLogger(__name__)
@@ -54,7 +54,7 @@ class InitRobenvCommand(Command):
         option(
             "ros-path",
             description="Where is your ros-installation located? "
-                        "Experimental only for ros 2: provide a link or path to a tar.gz.",
+            "Experimental only for ros 2: provide a link or path to a tar.gz.",
             default=get_default_ros_path(),
             flag=False,
             value_required=True,

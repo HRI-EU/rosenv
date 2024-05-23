@@ -332,6 +332,7 @@ class RobEnv:
         dependency: AbstractRelationship,
     ) -> bool:
         system_version = RobEnv._get_system_installed_version(name)
+
         # System dependencies MUST have a version. So if no version can be found, package is not installed
         return system_version is not None and dependency.matches(name, system_version)
 
