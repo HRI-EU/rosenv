@@ -277,10 +277,10 @@ def test_add_deb_file_install_aborted(
     assert_is_not_installed(robenv_target_path, nodeps.name, ros_distro)
 
 
-def test_add_shows_source_package_on_file_conflict(
+def test_add_source_package_on_file_conflict(
     init_app: Application,
     nodeps: Path,
-    nodeps2: Path,
+    nodeps_clone: Path,
     robenv_target_path: Path,
 ) -> None:
     CommandTester(init_app.find("add")).execute(
@@ -289,16 +289,16 @@ def test_add_shows_source_package_on_file_conflict(
 
     with pytest.raises(FileAlreadyInstalledError) as e:
         CommandTester(init_app.find("add")).execute(
-            f"{nodeps2!s}",
+            f"{nodeps_clone!s}",
         )
     assert e.value.installed_by_packages == ["nodeps"]
     assert e.value.file == robenv_target_path / "usr/share/doc/nodeps/README.Debian"
 
 
-def test_add_shows_multiple_source_packages_on_file_conflict(
+def test_add_multiple_source_packages_on_file_conflict(
     init_app: Application,
     nodeps: Path,
-    nodeps2: Path,
+    nodeps_clone: Path,
     robenv_target_path: Path,
 ) -> None:
     CommandTester(init_app.find("add")).execute(
@@ -310,7 +310,35 @@ def test_add_shows_multiple_source_packages_on_file_conflict(
 
     with pytest.raises(FileAlreadyInstalledError) as e:
         CommandTester(init_app.find("add")).execute(
-            f"{nodeps2!s}",
+            f"{nodeps_clone!s}",
         )
     assert e.value.installed_by_packages == ["nodeps"]
     assert e.value.file == robenv_target_path / "usr/share/doc/nodeps/README.Debian"
+
+
+def test_add_multiple_packages(
+    init_app: Application,
+    nodeps: Path,
+    nodeps2: Path,
+    robenv_target_path: Path,
+    ros_distro: RosDistribution,
+) -> None:
+    CommandTester(init_app.find("add")).execute(
+        f"{nodeps!s} {nodeps2!s}",
+    )
+
+    assert_is_installed(robenv_target_path, nodeps.name, ros_distro)
+    assert_is_installed(robenv_target_path, nodeps2.name, ros_distro)
+
+
+def test_add_multiple_packages_source_packages_on_file_conflict(
+    init_app: Application,
+    nodeps: Path,
+    nodeps2: Path,
+    nodeps_clone: Path,
+) -> None:
+    with pytest.raises(FileAlreadyInstalledError) as e:
+        CommandTester(init_app.find("add")).execute(
+            f"{nodeps!s} {nodeps2!s} {nodeps_clone!s}",
+        )
+    assert e.value.installed_by_packages == ["nodeps"]
