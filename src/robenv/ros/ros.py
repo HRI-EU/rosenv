@@ -40,7 +40,6 @@ from shutil import copy
 
 import requests
 
-from robenv.environment.distro import RosDistribution
 from robenv.environment.distro import parse_distro
 from robenv.environment.run_command import run_command
 
@@ -49,24 +48,23 @@ _logger = getLogger(__name__)
 
 
 class ROS:
-    path: Path
-    distro: RosDistribution
-    _distro_path: Path
-    _archive_path: Path
-
-    def __init__(self, path: str) -> None:
+    def __init__(self, path_or_url: str) -> None:
         cache_path = Path.home() / ".cache/robenv"
         xdg_home = os.environ.get("XDG_CACHE_HOME")
+
+        self._archive_path = Path()
+        self._distro_path = Path()
+
         if xdg_home is not None:
             cache_path = Path(xdg_home) / "robenv"
 
-        if path.startswith("http") or path.endswith("tar.gz"):
-            if "ros2" not in path:
+        if path_or_url.startswith("http") or path_or_url.endswith("tar.gz"):
+            if "ros2" not in path_or_url:
                 msg = "possible no ros2 archive, get a possible link/file from https://github.com/ros2/ros2/releases"
                 raise ValueError(
                     msg,
                 )
-            file_name = path.split("/")[-1]
+            file_name = path_or_url.split("/")[-1]
             # file_name is somthing like: ros2-humble-20231122-linux-jammy-amd64.tar.bz2
             file_name_split = file_name.split("-")
             distro_name = file_name_split[1]
@@ -75,20 +73,20 @@ class ROS:
             self._archive_path = cache_path / file_name
             self._distro_path = cache_path / file_name.split(".")[0]
             cache_path.mkdir(parents=True, exist_ok=True)
-            if "http" in path:
-                self._download(path)
+            if "http" in path_or_url:
+                self._download(path_or_url)
             else:
-                self._copy_to_cache(Path(path))
+                self._copy_to_cache(Path(path_or_url))
             self._install()
             self.path = self._find_path()
         else:
-            _logger.info(" %s ", path)
-            self.distro = parse_distro(path.split("/")[3])
-            self.path = Path(path)
+            _logger.info(" %s ", path_or_url)
+            self.distro = parse_distro(path_or_url.split("/")[3])
+            self.path = Path(path_or_url)
 
     def _find_path(self) -> Path:
         search = self._distro_path.glob("**/setup.sh")
-        return next(iter(search)).parent
+        return next(search).parent
 
     def _copy_to_cache(self, file_path: Path) -> None:
         if file_path.exists() and not self._archive_path.exists():
