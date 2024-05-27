@@ -33,6 +33,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from logging import getLogger
+from math import ceil
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -100,10 +101,17 @@ class AddCommand(Command):
     def _download_deb_file(url: str) -> Path:
         filename = Path(url).name
         _logger.info("Download %s from %s", filename, url)
-        download = requests.get(url, allow_redirects=True, timeout=60)
+        download = requests.get(url, allow_redirects=True, timeout=60, stream=True)
+        total = int(download.headers.get('content-length', 0))
         path = Path(f"dist/{filename}")
         path.parent.mkdir(exist_ok=True)
-        path.write_bytes(download.content)
+        size = 0
+        kb = 1024
+        with path.open('wb') as file:
+            for data in download.iter_content(chunk_size=kb):
+                size: int = size + file.write(data)
+                if not size % (kb * 1024) or size == total:
+                    _logger.info("Download progress: %imb of %imb", ceil(size/kb/kb), ceil(total/kb/kb))
         _logger.debug("saved %s at %s", filename, str(path))
         return path
 
