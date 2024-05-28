@@ -37,6 +37,7 @@ import os
 from logging import getLogger
 from pathlib import Path
 from shutil import copy
+from urllib.parse import urlparse
 
 import requests
 
@@ -58,13 +59,15 @@ class ROS:
         if xdg_home is not None:
             cache_path = Path(xdg_home) / "robenv"
 
-        if path_or_url.startswith("http") or path_or_url.endswith("tar.gz"):
+        path_or_url_parsed = urlparse(path_or_url)
+
+        if path_or_url_parsed.scheme in ("http", "https") or path_or_url_parsed.path.endswith("tar.bz2"):
             if "ros2" not in path_or_url:
                 msg = "possible no ros2 archive, get a possible link/file from https://github.com/ros2/ros2/releases"
                 raise ValueError(
                     msg,
                 )
-            file_name = path_or_url.split("/")[-1]
+            file_name = path_or_url_parsed.path.split("/")[-1]
             # file_name is somthing like: ros2-humble-20231122-linux-jammy-amd64.tar.bz2
             file_name_split = file_name.split("-")
             distro_name = file_name_split[1]

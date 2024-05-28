@@ -119,7 +119,7 @@ def _symlink_ros_files(
             )
 
 
-def _create_new_files(config: RobEnvInitConfig, ros_distro: str) -> None:
+def _create_new_files(config: RobEnvInitConfig, ros_distro: RosDistribution) -> None:
     ros_dir = config.robenv_ros_path
 
     initialize_rosdep(config.robenv_path, config.workspace_path, config.ros_distro, config.rosdep_path)

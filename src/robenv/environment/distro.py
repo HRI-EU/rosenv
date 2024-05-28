@@ -108,6 +108,7 @@ ROS2_DEFAULT_CONFIG = DistroConfig(
         "share",
         "src",
         "tools",
+        "local",
     ),
     builder_tool_variable_name="AMENT_CURRENT_PREFIX",
     meta_package_prevent_overwrite=(

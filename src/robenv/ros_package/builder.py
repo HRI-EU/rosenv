@@ -229,7 +229,7 @@ class Builder:
             )
             .replace(
                 f"/opt/ros/{distro}/setup.sh",
-                f"{self._robenv.path!s}/opt/ros/{distro}/setup.sh",
+                f"{self._robenv.path!s}/activate",
             ),
         )
 

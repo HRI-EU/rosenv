@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "${robenv_path}/opt/ros/${ros_distro}/setup.$$(basename -- "$$SHELL")"
+. "${robenv_path}/opt/ros/${ros_distro}/setup.sh"
 
 export PATH="${robenv_ros_path}/bin:${robenv_path}/usr/bin:$$PATH"
 export PKG_CONFIG_PATH="$$PKG_CONFIG_PATH:${robenv_ros_path}/lib/pkgconfig"

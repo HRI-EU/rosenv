@@ -53,7 +53,7 @@ def get_activate_contents(
     robenv_ros_path: Path,
     rosdep_source_dir: Path,
     robenv_cache_path: Path,
-    ros_distro: str,
+    ros_distro: RosDistribution,
 ) -> str:
     activate_template = Template((files(robenv.templates) / "activate.template").read_text())
     return activate_template.substitute(

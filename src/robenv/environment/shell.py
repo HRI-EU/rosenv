@@ -67,7 +67,7 @@ class RobEnvShell:
         return run_command(self.command_in_env(command), events=events, cwd=cwd)
 
     def command_in_env(self, command: str) -> str:
-        return f"bash -c 'source robenv/activate && {command}'"
+        return f"bash -c 'source {self._activate_script} && {command}'"
 
     def spawn(self) -> int:
         shell = self._get_shell()
@@ -96,6 +96,6 @@ class RobEnvShell:
             ["-i"],
             dimensions=(terminal.lines, terminal.columns),
         )
-        shell.sendline("source robenv/activate")
+        shell.sendline(f"source {self._activate_script}")
 
         return shell
