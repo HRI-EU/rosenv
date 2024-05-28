@@ -48,7 +48,6 @@ from robenv.rosdep.initialize import initialize_rosdep
 from robenv.rosdep.rosdep import get_sources_list
 from robenv.templates import get_activate_contents
 from robenv.templates import get_local_setup_contents
-from robenv.templates import get_setup_contents
 
 
 _logger = getLogger(__name__)
@@ -120,7 +119,7 @@ def _symlink_ros_files(
             )
 
 
-def _create_new_files(config: RobEnvInitConfig) -> None:
+def _create_new_files(config: RobEnvInitConfig, ros_distro: str) -> None:
     ros_dir = config.robenv_ros_path
 
     initialize_rosdep(config.robenv_path, config.workspace_path, config.ros_distro, config.rosdep_path)
@@ -132,22 +131,13 @@ def _create_new_files(config: RobEnvInitConfig) -> None:
             robenv_ros_path=config.robenv_ros_path,
             rosdep_source_dir=get_sources_list(config.robenv_path).parent,
             robenv_cache_path=config.robenv_cache_path,
+            ros_distro=ros_distro,
         ),
     )
 
     distro_config = get_distro_config(config.ros_distro)
     if "local_setup.sh" not in distro_config.files_to_copy:
         (ros_dir / "local_setup.sh").write_text(get_local_setup_contents(config.robenv_ros_path))
-
-    if (ros_dir / "setup.sh").exists():
-        (ros_dir / "setup.sh").rename(ros_dir / "distro_setup.sh")
-    (ros_dir / "setup.sh").write_text(
-        get_setup_contents(
-            config.robenv_ros_path,
-            activate_file,
-            config.ros_distro,
-        ),
-    )
 
     RobEnvSettings.initialize(config.robenv_path, config.ros_distro)
 
@@ -175,6 +165,6 @@ def initialize(
 
     _copy_ros_files(config.ros_path, robenv_ros_path, config.ros_distro)
     _symlink_ros_files(robenv_ros_path, config)
-    _create_new_files(config)
+    _create_new_files(config, ros_distro)
 
     return RobEnv()

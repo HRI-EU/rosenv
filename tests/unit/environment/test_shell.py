@@ -74,7 +74,7 @@ def shutil_mock(mocker: MockerFixture, terminal_size: MagicMock) -> MagicMock:
 
 @pytest.fixture()
 def activate_script(tmp_path: Path) -> Path:
-    return tmp_path / "opt/ros/noetic/setup.bash"
+    return tmp_path / "activate"
 
 
 def test_run_command__calls_command_within_env(run_command_mock: MagicMock, activate_script: Path) -> None:

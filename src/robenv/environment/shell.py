@@ -31,7 +31,6 @@
 #
 from __future__ import annotations
 
-import shlex
 import shutil
 import signal
 
@@ -59,12 +58,6 @@ class RobEnvShell:
     def __init__(self, activate_script: Path) -> None:
         self._activate_script = activate_script
 
-    def _get_activate_script(self, shell_name: SupportedShell | None = None) -> Path:
-        if shell_name is None:
-            shell_name, _ = detect_shell()
-
-        return self._activate_script.with_suffix(f".{shell_name}")
-
     def run(
         self,
         command: str,
@@ -74,7 +67,7 @@ class RobEnvShell:
         return run_command(self.command_in_env(command), events=events, cwd=cwd)
 
     def command_in_env(self, command: str) -> str:
-        return f"bash -c 'source {self._get_activate_script('bash')!s} && {command}'"
+        return f"bash -c 'source robenv/activate && {command}'"
 
     def spawn(self) -> int:
         shell = self._get_shell()
@@ -103,6 +96,6 @@ class RobEnvShell:
             ["-i"],
             dimensions=(terminal.lines, terminal.columns),
         )
-        shell.sendline(f"source {shlex.quote(str(self._get_activate_script()))}")
+        shell.sendline("source robenv/activate")
 
         return shell
