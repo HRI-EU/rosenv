@@ -74,7 +74,7 @@ def shutil_mock(mocker: MockerFixture, terminal_size: MagicMock) -> MagicMock:
 
 @pytest.fixture()
 def activate_script(tmp_path: Path) -> Path:
-    return tmp_path / "opt/ros/noetic/setup.bash"
+    return tmp_path / "activate"
 
 
 def test_run_command__calls_command_within_env(run_command_mock: MagicMock, activate_script: Path) -> None:
@@ -110,31 +110,7 @@ def test_get_shell__raises_on_unsupported_shell(
     assert not run_command_mock.spawn.called
 
 
-def test_get_shell__spawns_zsh_shell(
-    activate_script: Path,
-    detect_shell_mock: MagicMock,
-    pexpect_mock: MagicMock,
-    terminal_size: MagicMock,
-) -> None:
-    detect_shell_mock.return_value = "zsh", "/path/to/zsh"
-
-    robenv_shell = RobEnvShell(activate_script)
-
-    shell = robenv_shell._get_shell()  # noqa: SLF001
-
-    assert pexpect_mock.spawn.called
-    pexpect_mock.spawn.assert_called_once_with(
-        "/path/to/zsh",
-        ["-i"],
-        dimensions=(terminal_size.lines, terminal_size.columns),
-    )
-    assert shell is pexpect_mock.spawn.return_value
-    shell.sendline.assert_called_once_with(
-        f"source {activate_script.with_suffix('.zsh')}",
-    )
-
-
-def test_get_shell__spawns_bash_shell(
+def test_get_shell__spawnsshell(
     activate_script: Path,
     detect_shell_mock: MagicMock,
     terminal_size: MagicMock,
@@ -154,5 +130,5 @@ def test_get_shell__spawns_bash_shell(
     )
     assert shell is pexpect_mock.spawn.return_value
     shell.sendline.assert_called_once_with(
-        f"source {activate_script.with_suffix('.bash')}",
+        f"source {activate_script}",
     )

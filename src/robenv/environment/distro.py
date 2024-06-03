@@ -60,6 +60,7 @@ ROS1_DEFAULT_CONFIG = DistroConfig(
         "local_setup.zsh",
         "setup.bash",
         "setup.zsh",
+        "setup.sh",
     ),
     files_to_link=(
         ".catkin",
@@ -82,7 +83,6 @@ ROS1_DEFAULT_CONFIG = DistroConfig(
         "local_setup.sh",
         "local_setup.zsh",
         "setup.bash",
-        "setup.sh",
         "setup.zsh",
     ),
     rename_strategy=_default_rename_strategy,
@@ -90,11 +90,13 @@ ROS1_DEFAULT_CONFIG = DistroConfig(
 
 ROS2_DEFAULT_CONFIG = DistroConfig(
     files_to_copy=(
+        "_local_setup_util_sh.py",
         "_local_setup_util.py",
         "local_setup.bash",
         "local_setup.sh",
         "local_setup.zsh",
         "setup.bash",
+        "setup.sh",
         "setup.zsh",
     ),
     files_to_link=(
@@ -106,15 +108,16 @@ ROS2_DEFAULT_CONFIG = DistroConfig(
         "share",
         "src",
         "tools",
+        "local",
     ),
     builder_tool_variable_name="AMENT_CURRENT_PREFIX",
     meta_package_prevent_overwrite=(
+        "_local_setup_util_sh.py",
         "_local_setup_util.py",
         "local_setup.bash",
         "local_setup.sh",
         "local_setup.zsh",
         "setup.bash",
-        "setup.sh",
         "setup.zsh",
     ),
     rename_strategy=_default_rename_strategy,

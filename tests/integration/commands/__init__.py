@@ -32,6 +32,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Generator
+from unittest.mock import Mock
 
 from robenv.environment.distro import RosDistribution
 
@@ -39,6 +41,16 @@ from robenv.environment.distro import RosDistribution
 class MockResponse:
     def __init__(self, content: bytes) -> None:
         self.content = content
+        self.size = len(self.content)
+        self.headers = {"content-length": self.size}
+        self.iter_content = Mock()
+        self.iter_content.return_value = self._iter_content()
+
+    def _iter_content(self) -> Generator[bytes, None, None]:
+        n = 0
+        while n < self.size:
+            yield self.content[n : n + 1024]
+            n += 1024
 
 
 def package_name() -> str:

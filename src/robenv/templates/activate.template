@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. "${robenv_path}/opt/ros/${ros_distro}/setup.sh"
+
 export PATH="${robenv_ros_path}/bin:${robenv_path}/usr/bin:$$PATH"
 export PKG_CONFIG_PATH="$$PKG_CONFIG_PATH:${robenv_ros_path}/lib/pkgconfig"
 export LD_LIBRARY_PATH="$$LD_LIBRARY_PATH:${robenv_ros_path}/lib:${robenv_ros_path}/lib/x86_64-linux-gnu"
@@ -11,5 +13,7 @@ export ROSDEP_SOURCE_PATH="${rosdep_source_dir}"
 export ROS_HOME="${robenv_cache_path}/ros"
 
 export ROBENV_ENV="${robenv_path}"
+
+export ROS_DISTRO="${ros_distro}"
 
 PS1="[robenv/${robenv_name}] $${PS1-} "

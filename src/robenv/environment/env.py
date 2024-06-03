@@ -187,10 +187,8 @@ class RobEnvSettings:
 class RobEnv:
     def __init__(self) -> None:
         self.path = locate(DEFAULT_ROBENV_NAME)
-        # TODO(Moritz): /opt/ros/noetic is only correct if venv was created with default ros-path
-        # https://dmz-gitlab.honda-ri.de/SSE/robenv/-/issues/28
         self._settings = RobEnvSettings.read(self.path)
-        self.shell = RobEnvShell(self.path / f"opt/ros/{self._settings.ros_distro}/setup.sh")
+        self.shell = RobEnvShell(self.path / "activate")
         self._rosdep: Rosdep | None = None
 
     @property
@@ -332,6 +330,7 @@ class RobEnv:
         dependency: AbstractRelationship,
     ) -> bool:
         system_version = RobEnv._get_system_installed_version(name)
+
         # System dependencies MUST have a version. So if no version can be found, package is not installed
         return system_version is not None and dependency.matches(name, system_version)
 

@@ -182,8 +182,8 @@ def build_and_install_can_fail(
     "_copy_minimal_example_project",
 )
 def test_install_should_install_workspace(
-    init_app: Application,
     run_mock: MagicMock,
+    init_app: Application,
     dist_path: Path,
     ros_workspace_path: Path,
     robenv_target_path: Path,
